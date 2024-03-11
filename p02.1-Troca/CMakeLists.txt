@@ -3,4 +3,4 @@ project(UAB_LP_2024 C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(UAB_LP_2024 Variaveis.c)
+add_executable(UAB_LP_2024 Troca.c)
