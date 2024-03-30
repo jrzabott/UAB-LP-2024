@@ -3,4 +3,4 @@ project(fup C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(fup fup.c)
+add_executable(fup fdup.c)
