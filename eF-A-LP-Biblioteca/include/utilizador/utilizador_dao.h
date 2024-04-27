@@ -3,6 +3,8 @@
 
 #include "utilizador.h"
 
+static const int NUMERO_EMPRESTIMO_INVALIDO = -1;
+
 // Carrega a lista de utilizadores a partir de um arquivo CSV
 void carregarUtilizadoresDeCSV(const char *caminhoArquivo);
 

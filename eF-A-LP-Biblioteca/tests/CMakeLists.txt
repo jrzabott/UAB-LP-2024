@@ -1,17 +1,36 @@
 cmake_minimum_required(VERSION 3.10)
 project(eF-A-LP-Biblioteca-Tests)
 
-# Include the main project's header files and Unity test framework.
+# Incluir o ficheiro de cabeçalho do projeto principal e o framework de testes Unity.
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(util/unity)
 
-# Add Unity source files and the test file.
-add_executable(runTests
-        util/unity/unity.c
+# Adicionar os ficheiros de código fonte do Unity e o ficheiro C necessarios para o teste.
+add_executable(
+        test_utilizador                     # Nome do executável de teste.
+        util/unity/unity.c                  # Ficheiros necessario ao teste...
         ../include/utilizador/utilizador.h
         ../src/utilizador/utilizador.c
         utilizador/test_utilizador.c
 )
 
-# Specify where the test executable should be built.
+add_executable(
+        test_utilizador_dao                 # Nome do executável de teste.
+        util/unity/unity.c                  # Ficheiros necessario ao teste...
+        ../include/utilizador/utilizador.h
+        ../include/utilizador/utilizador_dao.h
+        ../src/utilizador/utilizador.c
+        ../src/utilizador/utilizador_dao.c
+        utilizador/test_utilizador_dao.c
+)
+
+
+
+# Especificar onde o executável de teste deve ser "built".
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
+# Adicionar a biblioteca de testes ao executável de teste.
+enable_testing()
+
+# Adicionar o executável de teste ao CTest.
+add_test(NAME test_utilizador COMMAND test_utilizador)
+add_test(NAME test_utilizador_dao COMMAND test_utilizador_dao)
