@@ -5,11 +5,21 @@ project(eF-A-LP-Biblioteca)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-# Add the headers location to your project.
-include_directories(include)
+# Localização dos arquivos de cabeçalho.
+include_directories(
+        include
+        include/emprestimo
+        include/livro
+        include/utilizador
+)
 
-# Add source files.
-#add_executable(eF-A-LP-Biblioteca src/main.c)
+# Ficheiros de código fonte.
+add_executable(
+        main        # Nome do executável
+        src/main.c  # Arquivo principal
+        src/utilizador/utilizador.c
+        src/utilizador/utilizador_dao.c
+)
 
 # Specify where the executable should be built.
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
