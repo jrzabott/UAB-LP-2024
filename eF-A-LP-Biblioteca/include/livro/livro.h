@@ -11,6 +11,9 @@ typedef struct {
     int exemplaresDisponiveis;   // Exemplares disponíveis para empréstimo
 } Livro;
 
+extern Livro *livros;  // Array dinâmico de livros
+extern int totalLivros;  // Contador de livros
+
 // Inicializa a lista de livros
 void inicializarLivros();
 
@@ -23,19 +26,25 @@ void removerLivro(int idLivro);
 // Atualiza os dados de um livro existente
 void atualizarLivro(Livro livroAtualizado);
 
-// Busca um livro pelo título
-Livro *buscarLivroPorTitulo(const char *titulo);
+// Busca livros pelo título
+Livro** buscarLivrosPorTitulo(const char *titulo, int *count);
 
-// Busca um livro pelo autor
-Livro *buscarLivroPorAutor(const char *autor);
+// Busca livros pelo autor
+Livro** buscarLivrosPorAutor(const char *autor, int *count);
 
-// Busca um livro pelo gênero
-Livro *buscarLivroPorGenero(const char *genero);
+// Busca livros pelo gênero
+Livro** buscarLivrosPorGenero(const char *genero, int *count);
+
+// Busca livros pelo id
+Livro* buscarLivroPorId(int idLivro);
 
 // Lista todos os livros disponíveis
 void listarLivrosDisponiveis();
 
 // Lista todos os livros
 void listarTodosOsLivros();
+
+// Libera a memória alocada para os livros
+void liberarMemoriaLivros();
 
 #endif //EF_A_LP_BIBLIOTECA_LIVRO_H
