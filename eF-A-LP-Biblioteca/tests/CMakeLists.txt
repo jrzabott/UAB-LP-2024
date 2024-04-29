@@ -32,6 +32,15 @@ add_executable(
         livro/test_livro.c
 )
 
+add_executable(
+        test_livro_dao                       # Nome do executável de teste.
+        util/unity/unity.c                   # Ficheiros necessario ao teste...
+        ../include/livro/livro_dao.h
+        ../src/livro/livro.c
+        ../src/livro/livro_dao.c
+        livro/test_livro_dao.c
+)
+
 # Especificar onde o executável de teste deve ser "built".
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 # Adicionar a biblioteca de testes ao executável de teste.
@@ -41,3 +50,4 @@ enable_testing()
 add_test(NAME test_utilizador COMMAND test_utilizador)
 add_test(NAME test_utilizador_dao COMMAND test_utilizador_dao)
 add_test(NAME test_livro COMMAND test_livro)
+add_test(NAME test_livro_dao COMMAND test_livro_dao)

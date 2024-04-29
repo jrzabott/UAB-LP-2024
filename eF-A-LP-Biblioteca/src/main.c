@@ -84,3 +84,11 @@ int main() {
 
     return 0;
 }
+
+// TODO - livro.c - adicionar livro deveria verificar se livro ja existe por titulo e incrementar total de exemplares
+
+// TODO - livro.c - atualizar livro nao valida dados de entrada, do ponto de vista logico.
+
+// TODO - *_dao.c - deve de haver uma abstracao tal que a leitura e escrita de CSV existam a parte.
+//                  devemos ainda tornar o CSV configuravel a partir de um ficheiro com os cabecalhos na ordem correta.
+//                  o mesmo para o tamanho maximo de linha suportado

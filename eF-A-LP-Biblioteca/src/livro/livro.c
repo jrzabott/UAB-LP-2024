@@ -96,6 +96,7 @@ void liberarMemoriaLivros() {
         livros[i].genero = NULL;
     }
     free(livros);
+    totalLivros = 0;
 }
 
 void listarLivrosDisponiveis() {
@@ -135,5 +136,4 @@ Livro *buscarLivroPorId(int idLivro) {
     return NULL;
 }
 
-// TODO - adicionar livro deveria verificar se livro ja existe por titulo e incrementar total de exemplares
-// TODO - atualizar livro nao valida dados de entrada, do ponto de vista logico.
+
