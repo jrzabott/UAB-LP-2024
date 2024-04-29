@@ -55,3 +55,27 @@ void listarTodosOsUtilizadores() {
                listaUtilizadores[i].email, listaUtilizadores[i].livrosEmprestados);
     }
 }
+
+Utilizador *buscarUtilizadorPorId(int idUtilizador) {
+    for (int i = 0; i < totalUtilizadores; i++) {
+        if (listaUtilizadores[i].idUtilizador == idUtilizador) {
+            return &listaUtilizadores[i]; // Retornar o utilizador com o ID correspondente
+        }
+    }
+    return NULL; // Nenhum utilizador encontrado
+}
+
+int utilizadorExiste(int idUtilizador) {
+    return buscarUtilizadorPorId(idUtilizador) != NULL;
+}
+
+void liberarMemoriaUtilizadores() {
+    for (int i = 0; i < totalUtilizadores; i++) {
+        free(listaUtilizadores[i].nome);
+        free(listaUtilizadores[i].email);
+        listaUtilizadores[i].nome = NULL;
+        listaUtilizadores[i].email = NULL;
+    }
+    free(listaUtilizadores);
+    totalUtilizadores = 0;
+}

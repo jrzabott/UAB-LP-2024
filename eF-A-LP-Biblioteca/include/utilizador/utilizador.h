@@ -31,4 +31,13 @@ Utilizador *buscarUtilizadorPorNome(const char *nome);
 // Lista todos os utilizadores
 void listarTodosOsUtilizadores();
 
+// Verifica se um dado utilizador existe
+int utilizadorExiste(int idUtilizador);
+
+// Busca um utilizador pelo ID
+Utilizador *buscarUtilizadorPorId(int idUtilizador);
+
+// Libera a memória alocada para os utilizadores
+void liberarMemoriaUtilizadores();
+
 #endif //EF_A_LP_BIBLIOTECA_UTILIZADOR_H

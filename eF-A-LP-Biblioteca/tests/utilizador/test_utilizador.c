@@ -10,9 +10,7 @@ void setUp(void) {
 
 void tearDown(void) {
     // Função que é chamada após cada teste
-    free(listaUtilizadores);
-    listaUtilizadores = NULL;
-    totalUtilizadores = 0;
+    liberarMemoriaUtilizadores();
 }
 
 void test_adicionarUtilizador(void) {
@@ -58,6 +56,36 @@ void test_listarTodosOsUtilizadores(void) {
     listarTodosOsUtilizadores();  // Verifique a saída manualmente ou use mocks
 }
 
+// Teste para verificar se um utilizador existente é encontrado
+void test_buscarUtilizadorPorId_Existente(void) {
+    Utilizador u1 = {1, "João Silva", "email", 0};
+    adicionarUtilizador(u1);
+    Utilizador *u = buscarUtilizadorPorId(1);
+    TEST_ASSERT_NOT_NULL(u);
+    TEST_ASSERT_EQUAL(1, u->idUtilizador);
+    TEST_ASSERT_EQUAL_STRING("João Silva", u->nome);
+}
+
+// Teste para verificar se retorna NULL quando nenhum utilizador é encontrado
+void test_buscarUtilizadorPorId_Inexistente(void) {
+    Utilizador *u = buscarUtilizadorPorId(999);
+    TEST_ASSERT_NULL(u);
+}
+
+// Teste para verificar se utilizadorExiste retorna verdadeiro para um utilizador existente
+void test_utilizadorExiste_Existente(void) {
+    Utilizador u1 = {1, "João Silva", "email", 0};
+    adicionarUtilizador(u1);
+    int existe = utilizadorExiste(1);
+    TEST_ASSERT_TRUE(existe);
+}
+
+// Teste para verificar se utilizadorExiste retorna falso para um utilizador que não existe
+void test_utilizadorExiste_Inexistente(void) {
+    int existe = utilizadorExiste(999);
+    TEST_ASSERT_FALSE(existe);
+}
+
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_adicionarUtilizador);
@@ -65,5 +93,9 @@ int main(void) {
     RUN_TEST(test_atualizarUtilizador);
     RUN_TEST(test_buscarUtilizadorPorNome);
     RUN_TEST(test_listarTodosOsUtilizadores);
+    RUN_TEST(test_buscarUtilizadorPorId_Existente);
+    RUN_TEST(test_buscarUtilizadorPorId_Inexistente);
+    RUN_TEST(test_utilizadorExiste_Existente);
+    RUN_TEST(test_utilizadorExiste_Inexistente);
     return UNITY_END();
 }
