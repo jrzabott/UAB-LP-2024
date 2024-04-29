@@ -71,10 +71,10 @@ int utilizadorExiste(int idUtilizador) {
 
 void liberarMemoriaUtilizadores() {
     for (int i = 0; i < totalUtilizadores; i++) {
-        free(listaUtilizadores[i].nome);
-        free(listaUtilizadores[i].email);
         listaUtilizadores[i].nome = NULL;
         listaUtilizadores[i].email = NULL;
+        free(listaUtilizadores[i].nome);
+        free(listaUtilizadores[i].email);
     }
     free(listaUtilizadores);
     totalUtilizadores = 0;

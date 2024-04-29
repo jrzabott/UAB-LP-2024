@@ -5,32 +5,44 @@
 #include "../utilizador/utilizador.h"
 #include <time.h>
 
-// Estrutura para representar um empréstimo
+// Estrutura para representar um empréstimo de livro
 typedef struct {
-    int idEmprestimo;              // Identificador único do empréstimo
-    int idLivro;                   // Identificador do livro emprestado
-    int idUtilizador;              // Identificador do utilizador que tomou o livro emprestado
-    time_t dataEmprestimo;         // Data do empréstimo
-    time_t dataDevolucaoPrevista;  // Data prevista para devolução
-    time_t dataDevolucaoReal;      // Data real da devolução (0 se ainda não devolvido)
+    int idEmprestimo;                // Identificador único do empréstimo
+    int idLivro;                     // Identificador do livro emprestado
+    int idUtilizador;                // Identificador do utilizador que pegou o livro
+    time_t dataEmprestimo;           // Data do empréstimo
+    time_t dataDevolucaoPrevista;    // Data prevista para devolução
+    time_t dataDevolucaoReal;        // Data real de devolução
 } Emprestimo;
 
-// Inicializa a lista de empréstimos
+// Estrutura para armazenar os empréstimos
+typedef struct {
+    Emprestimo *emprestimos;
+    int totalEmprestimos;
+    int capacidadeEmprestimos;
+} GestaoEmprestimos;
+
+extern GestaoEmprestimos *gestao;
+
+// Inicializa a gestão de empréstimos
 void inicializarEmprestimos();
 
-// Registra um novo empréstimo
-void registrarEmprestimo(Emprestimo novoEmprestimo);
+// Regista um novo empréstimo (retorna 0 em caso de sucesso, -1 em caso de erro)
+int adicionarEmprestimo(Emprestimo novoEmprestimo);
 
-// Finaliza um empréstimo indicando a devolução do livro
-void finalizarEmprestimo(int idEmprestimo, time_t dataDevolucao);
+// Atualiza a data de devolução de um empréstimo
+void actualizarDevolucaoEmprestimo(int idEmprestimo, time_t novaDataDevolucao);
 
 // Renova um empréstimo, estendendo a data de devolução prevista
-void renovarEmprestimo(int idEmprestimo, time_t novaDataDevolucaoPrevista);
+void renovarEmprestimo(int idEmprestimo, int diasAdicionais);
 
-// Busca empréstimos por ID de utilizador
-Emprestimo *buscarEmprestimosPorUtilizador(int idUtilizador);
+// Finaliza um empréstimo indicando a devolução do livro
+void finalizarEmprestimo(int idEmprestimo);
 
-// Lista todos os empréstimos
-void listarTodosOsEmprestimos();
+// Lista todos os empréstimos activos (livros ainda não devolvidos)
+void listarEmprestimosActivos();
+
+// Libera recursos utilizados pelo sistema de empréstimos
+void liberarGestaoEmprestimos();
 
 #endif //EF_A_LP_BIBLIOTECA_EMPRESTIMO_H

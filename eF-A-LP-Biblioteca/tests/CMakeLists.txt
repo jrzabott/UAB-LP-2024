@@ -40,6 +40,17 @@ add_executable(
         ../src/livro/livro_dao.c
         livro/test_livro_dao.c
 )
+add_executable(
+        test_emprestimo                       # Nome do executável de teste.
+        util/unity/unity.c                   # Ficheiros necessario ao teste...
+        ../include/livro/livro.h
+        ../include/utilizador/utilizador.h
+        ../include/emprestimo/emprestimo.h
+        ../src/livro/livro.c
+        ../src/utilizador/utilizador.c
+        ../src/emprestimo/emprestimo.c
+        emprestimo/test_emprestimo.c
+)
 
 # Especificar onde o executável de teste deve ser "built".
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
