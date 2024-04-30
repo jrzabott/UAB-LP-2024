@@ -49,6 +49,8 @@ void test_gravacaoLeituraConsistencia(void) {
     adicionarLivro(l);
     guardarLivrosEmCSV("livros_consistencia.csv");
     liberarMemoriaLivros();  // Limpar a memória para simular reinicialização do programa
+
+    setUp();
     carregarLivrosDeCSV("livros_consistencia.csv");
     TEST_ASSERT_EQUAL(1, totalLivros);
     TEST_ASSERT_EQUAL_STRING("Sapiens", livros[0].titulo);

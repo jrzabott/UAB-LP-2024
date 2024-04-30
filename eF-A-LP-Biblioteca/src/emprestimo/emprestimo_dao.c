@@ -8,7 +8,9 @@
 void carregarEmprestimosDeCSV(const char *caminhoArquivo) {
     FILE *file = fopen(caminhoArquivo, "r");
     if (!file) {
-        perror("Erro ao abrir arquivo de empréstimos");
+        char errorMsg[1024];
+        snprintf(errorMsg, sizeof(errorMsg), "Erro ao abrir arquivo de empréstimos '%s'", caminhoArquivo);
+        perror(errorMsg);
         return;
     }
 
@@ -34,7 +36,7 @@ void carregarEmprestimosDeCSV(const char *caminhoArquivo) {
         e.dataDevolucaoReal = (time_t)atoll(token);
 
         // Suponha uma função adicionarEmprestimo() que adiciona à lista em memória
-        adicionarEmprestimo(e);
+        gestao->emprestimos[gestao->totalEmprestimos++] = e;
     }
     fclose(file);
 }
@@ -46,7 +48,6 @@ void guardarEmprestimosEmCSV(const char *caminhoArquivo) {
         return;
     }
 
-    // Suponha que 'emprestimos' e 'totalEmprestimos' sejam acessíveis aqui
     for (int i = 0; i < gestao->totalEmprestimos; i++) {
         fprintf(file, "%d,%d,%d,%ld,%ld,%ld\n",
                 gestao->emprestimos[i].idEmprestimo,

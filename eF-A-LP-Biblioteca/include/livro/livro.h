@@ -18,7 +18,7 @@ extern int totalLivros;  // Contador de livros
 void inicializarLivros();
 
 // Adiciona um novo livro à lista
-void adicionarLivro(Livro novoLivro);
+int adicionarLivro(Livro novoLivro);
 
 // Remove um livro pelo ID
 void removerLivro(int idLivro);
@@ -40,6 +40,9 @@ Livro* buscarLivroPorId(int idLivro);
 
 // Lista todos os livros disponíveis
 void listarLivrosDisponiveis();
+
+// Lista todos os livros emprestados
+void listarLivrosEmprestados();
 
 // Lista todos os livros
 void listarTodosOsLivros();

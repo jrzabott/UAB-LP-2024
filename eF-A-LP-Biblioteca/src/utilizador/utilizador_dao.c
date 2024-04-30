@@ -51,7 +51,9 @@ int validarDadosUtilizador(char *linha, Utilizador *u, int linhaNum) {
 void carregarUtilizadoresDeCSV(const char *caminhoArquivo) {
     FILE *file = fopen(caminhoArquivo, "r");
     if (!file) {
-        perror("Erro ao abrir arquivo de utilizadores");
+        char errorMsg[1024];
+        snprintf(errorMsg, sizeof(errorMsg), "Erro ao abrir arquivo de utilizadores '%s'", caminhoArquivo);
+        perror(errorMsg);
         return;
     }
 

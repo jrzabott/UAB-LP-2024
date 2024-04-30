@@ -45,4 +45,10 @@ void listarEmprestimosActivos();
 // Libera recursos utilizados pelo sistema de empréstimos
 void liberarGestaoEmprestimos();
 
+// Listar todos os emprestimos
+void listarTodosOsEmprestimos();
+
+// Buscar emprestimo por id
+Emprestimo *buscarEmprestimoPorId(int idEmprestimo);
+
 #endif //EF_A_LP_BIBLIOTECA_EMPRESTIMO_H

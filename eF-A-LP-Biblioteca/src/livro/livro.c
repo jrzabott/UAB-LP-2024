@@ -6,22 +6,61 @@
 Livro *livros = NULL;
 int totalLivros = 0;
 int capacidadeLivros = 10;
+static int maiorId = 0;
 
 void inicializarLivros() {
     livros = malloc(sizeof(Livro) * capacidadeLivros);
+    // Inicializar a lista de livros
+    for (int i = 0; i < capacidadeLivros; i++) {
+        livros[i].idLivro = 0;
+        livros[i].titulo = NULL;
+        livros[i].autor = NULL;
+        livros[i].genero = NULL;
+        livros[i].exemplaresDisponiveis = 0;
+        livros[i].exemplaresTotal = 0;
+    }
     totalLivros = 0;
 }
 
-void adicionarLivro(Livro novoLivro) {
+// procura o maior id, salva em cache e retorna o proximo id disponivel
+static int obterIdValido(int id) {
+    if (id > maiorId) {
+        maiorId = id;
+        return maiorId;
+    }
+    if (maiorId == 0) {
+        // procurar o maior id
+        for (int i = 0; i < totalLivros; i++) {
+            if (livros[i].idLivro > maiorId)
+                maiorId = livros[i].idLivro;
+        }
+    }
+    return ++maiorId;
+}
+
+int adicionarLivro(Livro novoLivro) {
     if (totalLivros == capacidadeLivros) {
         capacidadeLivros *= 2;
         livros = realloc(livros, sizeof(Livro) * capacidadeLivros);
+        // Inicializar as novas posições
+        for (int i = totalLivros; i < capacidadeLivros; i++) {
+            livros[i].idLivro = 0;
+            livros[i].titulo = NULL;
+            livros[i].autor = NULL;
+            livros[i].genero = NULL;
+            livros[i].exemplaresDisponiveis = 0;
+            livros[i].exemplaresTotal = 0;
+        }
     }
+    // verificar se livro com este ID ja existe, caso positivo, procurar o proximo ID disponivel
+    novoLivro.idLivro = obterIdValido(novoLivro.idLivro);
+
     livros[totalLivros] = novoLivro;
     livros[totalLivros].titulo = strdup(novoLivro.titulo);
     livros[totalLivros].autor = strdup(novoLivro.autor);
     livros[totalLivros].genero = strdup(novoLivro.genero);
     totalLivros++;
+    return novoLivro.idLivro;
 }
 
 void removerLivro(int idLivro) {
@@ -94,8 +133,11 @@ void liberarMemoriaLivros() {
         livros[i].titulo = NULL;
         livros[i].autor = NULL;
         livros[i].genero = NULL;
+        livros[i].exemplaresDisponiveis = 0;
+        livros[i].exemplaresTotal = 0;
     }
     free(livros);
+    livros = NULL;
     totalLivros = 0;
 }
 
@@ -136,4 +178,14 @@ Livro *buscarLivroPorId(int idLivro) {
     return NULL;
 }
 
-
+void listarLivrosEmprestados() {
+    printf("Lista de Livros Emprestados:\n");
+    for (int i = 0; i < totalLivros; i++) {
+        if (livros[i].exemplaresDisponiveis < livros[i].exemplaresTotal) {
+            printf("%d: %s por %s (%s) - %d / %d exemplares disponíveis\n",
+                   livros[i].idLivro, livros[i].titulo, livros[i].autor,
+                   livros[i].genero, livros[i].exemplaresDisponiveis,
+                   livros[i].exemplaresTotal);
+        }
+    }
+}

@@ -19,6 +19,11 @@ add_executable(
         src/main.c  # Arquivo principal
         src/utilizador/utilizador.c
         src/utilizador/utilizador_dao.c
+        src/livro/livro.c
+        src/livro/livro_dao.c
+        src/emprestimo/emprestimo.c
+        src/emprestimo/emprestimo_dao.c
+        src/relatorio/relatorio.c
 )
 
 # Specify where the executable should be built.

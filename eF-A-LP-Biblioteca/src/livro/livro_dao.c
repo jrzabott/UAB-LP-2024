@@ -117,7 +117,9 @@ int validarDadosLivro(char *linha, Livro *l, int linhaNum) {
 void carregarLivrosDeCSV(const char *caminhoArquivo) {
     FILE *file = fopen(caminhoArquivo, "r");
     if (!file) {
-        perror("Erro ao abrir arquivo de livros");
+        char errorMsg[1024];
+        sprintf(errorMsg, "Erro ao abrir arquivo de livros %s\n", caminhoArquivo);
+        perror(errorMsg);
         return;
     }
 
