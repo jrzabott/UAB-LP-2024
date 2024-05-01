@@ -8,6 +8,10 @@ int totalLivros = 0;
 int capacidadeLivros = 10;
 static int maiorId = 0;
 
+Livro LIVRO_NAO_ENCONTRADO;
+
+void inicializarLivroNaoEncontrado();
+
 void inicializarLivros() {
     livros = malloc(sizeof(Livro) * capacidadeLivros);
     // Inicializar a lista de livros
@@ -20,6 +24,17 @@ void inicializarLivros() {
         livros[i].exemplaresTotal = 0;
     }
     totalLivros = 0;
+    maiorId = 0;
+    inicializarLivroNaoEncontrado();
+}
+
+void inicializarLivroNaoEncontrado() {
+    LIVRO_NAO_ENCONTRADO.idLivro = 0;
+    LIVRO_NAO_ENCONTRADO.titulo = "Livro não encontrado";
+    LIVRO_NAO_ENCONTRADO.autor = "";
+    LIVRO_NAO_ENCONTRADO.genero = "";
+    LIVRO_NAO_ENCONTRADO.exemplaresTotal = 0;
+    LIVRO_NAO_ENCONTRADO.exemplaresDisponiveis = 0;
 }
 
 // procura o maior id, salva em cache e retorna o proximo id disponivel
@@ -138,7 +153,10 @@ void liberarMemoriaLivros() {
     }
     free(livros);
     livros = NULL;
-    totalLivros = 0;
+
+    free(LIVRO_NAO_ENCONTRADO.titulo);
+    free(LIVRO_NAO_ENCONTRADO.autor);
+    free(LIVRO_NAO_ENCONTRADO.genero);
 }
 
 void listarLivrosDisponiveis() {
@@ -175,7 +193,7 @@ Livro *buscarLivroPorId(int idLivro) {
             return &livros[i];
         }
     }
-    return NULL;
+    return &LIVRO_NAO_ENCONTRADO;
 }
 
 void listarLivrosEmprestados() {

@@ -37,7 +37,7 @@ void actualizarDevolucaoEmprestimo(int idEmprestimo, time_t novaDataDevolucao);
 void renovarEmprestimo(int idEmprestimo, int diasAdicionais);
 
 // Finaliza um empréstimo indicando a devolução do livro
-void finalizarEmprestimo(int idEmprestimo);
+int finalizarEmprestimo(int idEmprestimo);
 
 // Lista todos os empréstimos activos (livros ainda não devolvidos)
 void listarEmprestimosActivos();

@@ -130,7 +130,7 @@ void test_buscarLivroPorId(void) {
 
     // Teste para livro que não existe
     found = buscarLivroPorId(2);
-    TEST_ASSERT_NULL(found);
+    TEST_ASSERT_EQUAL(0, found->idLivro);
 }
 
 int main(void) {

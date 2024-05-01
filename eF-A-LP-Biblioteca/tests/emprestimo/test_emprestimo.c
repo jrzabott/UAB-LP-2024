@@ -99,6 +99,11 @@ void test_finalizarEmprestimo_JaDevolvido(void) {
 }
 
 void test_RedimensionamentoArray(void) {
+    liberarMemoriaUtilizadores(); // necessario pois metodo setUp adicionar dois utilizadores por defeito.
+    inicializarUtilizadores();
+    liberarMemoriaLivros(); // da mesma forma
+    inicializarLivros();
+
     for (int i = 0; i < 20; i++) {  // Adiciona mais empréstimos do que a capacidade inicial de 10
         // para cada iteracao, precisamos de um novo livro e um novo utilizador
         Livro l = {100+i, "Livro", "Autor", "Categoria", 10, 10};

@@ -127,11 +127,20 @@ void atualizarLivroInterativo() {
     scanf("%d", &id);
     getchar();
 
-    Livro livroAtualizado = *buscarLivroPorId(id);
-    if (&livroAtualizado == NULL) {
+    Livro livroExistente = *buscarLivroPorId(id);
+    if (livroExistente.idLivro == 0) {
         printf("Livro não encontrado!\n");
         return;
     }
+
+    Livro livroAtualizado = {
+            livroExistente.idLivro,
+            strdup(livroExistente.titulo),
+            strdup(livroExistente.autor),
+            strdup(livroExistente.genero),
+            livroExistente.exemplaresTotal,
+            livroExistente.exemplaresDisponiveis
+    };
 
     printf("Atualize o título do livro (%s): ", livroAtualizado.titulo);
     fgets(livroAtualizado.titulo, 100, stdin);
@@ -145,13 +154,21 @@ void atualizarLivroInterativo() {
     fgets(livroAtualizado.genero, 100, stdin);
     livroAtualizado.genero[strcspn(livroAtualizado.genero, "\n")] = 0;
 
-    printf("Atualize o total de exemplares (%d): ", livroAtualizado.exemplaresTotal);
+    printf("Atualize o total de exemplares do livro (%d): ", livroAtualizado.exemplaresTotal);
     scanf("%d", &livroAtualizado.exemplaresTotal);
     getchar();
 
-    livroAtualizado.exemplaresDisponiveis = livroAtualizado.exemplaresTotal;
+    printf("Atualize o total de exemplares disponíveis do livro (%d): ", livroAtualizado.exemplaresDisponiveis);
+    scanf("%d", &livroAtualizado.exemplaresDisponiveis);
+    getchar();
 
     atualizarLivro(livroAtualizado);
+
+    printf("Livro atualizado com sucesso!\nID: %d\nTítulo: %s\nAutor: %s\nGênero: %s\nTotal de exemplares: %d\n", livroAtualizado.idLivro, livroAtualizado.titulo, livroAtualizado.autor, livroAtualizado.genero, livroAtualizado.exemplaresTotal);
+
+    free(livroAtualizado.titulo);
+    free(livroAtualizado.autor);
+    free(livroAtualizado.genero);
 }
 
 void menuLivros() {
@@ -331,7 +348,10 @@ void finalizarEmprestimoInterativo() {
     scanf("%d", &idEmprestimo);
     getchar();
 
-    finalizarEmprestimo(idEmprestimo);
+    if (finalizarEmprestimo(idEmprestimo) == 0) {
+        printf("Empréstimo não encontrado ou já devolvido.\n");
+        return;
+    }
     printf("Empréstimo finalizado com sucesso.\n");
 }
 

@@ -15,8 +15,8 @@ void inicializarUtilizadores() {
         listaUtilizadores[i].nome = NULL;
         listaUtilizadores[i].email = NULL;
     }
-
     totalUtilizadores = 0;
+    maiorId = 0;
 }
 
 // procura o maior id, salva em cache e retorna o proximo id disponivel
@@ -55,7 +55,9 @@ void adicionarUtilizador(Utilizador novoUtilizador) {
 void removerUtilizador(int idUtilizador) {
     for (int i = 0; i < totalUtilizadores; i++) {
         if (listaUtilizadores[i].idUtilizador == idUtilizador) {
-            memmove(&listaUtilizadores[i], &listaUtilizadores[i + 1], (totalUtilizadores - i - 1) * sizeof(Utilizador));
+            for (int j = i; j < totalUtilizadores - 1; j++) {
+                listaUtilizadores[j] = listaUtilizadores[j + 1];
+            }
             totalUtilizadores--;
             break;
         }
@@ -110,5 +112,4 @@ void liberarMemoriaUtilizadores() {
     }
     free(listaUtilizadores);
     listaUtilizadores = NULL;
-    totalUtilizadores = 0;
 }

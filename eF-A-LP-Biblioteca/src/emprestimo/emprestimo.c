@@ -21,6 +21,7 @@ void inicializarEmprestimos() {
         gestao->emprestimos[i].dataDevolucaoPrevista = 0;
         gestao->emprestimos[i].dataDevolucaoReal = 0;
     }
+    maiorId = 0;
 }
 
 // procura o maior id, salva em cache e retorna o proximo id disponivel
@@ -98,16 +99,20 @@ void renovarEmprestimo(int idEmprestimo, int diasAdicionais) {
     }
 }
 
-void finalizarEmprestimo(int idEmprestimo) {
+int finalizarEmprestimo(int idEmprestimo) {
+    int emprestimoFinalizado = 0;
     for (int i = 0; i < gestao->totalEmprestimos; i++) {
         if (gestao->emprestimos[i].idEmprestimo == idEmprestimo) {
             // Marcar o empréstimo como concluído pode envolver apenas ajustar a data de devolução real para agora
             gestao->emprestimos[i].dataDevolucaoReal = time(NULL);
             // Reduzir contador de livros emprestados de utilizador
             buscarUtilizadorPorId(gestao->emprestimos[i].idUtilizador)->livrosEmprestados--;
+            // flag para emprestimo encontrado e finalizado com sucesso
+            emprestimoFinalizado = 1;
             break;
         }
     }
+    return emprestimoFinalizado;
 }
 
 void liberarGestaoEmprestimos() {
