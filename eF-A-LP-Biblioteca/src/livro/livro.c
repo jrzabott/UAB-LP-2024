@@ -153,10 +153,6 @@ void liberarMemoriaLivros() {
     }
     free(livros);
     livros = NULL;
-
-    free(LIVRO_NAO_ENCONTRADO.titulo);
-    free(LIVRO_NAO_ENCONTRADO.autor);
-    free(LIVRO_NAO_ENCONTRADO.genero);
 }
 
 void listarLivrosDisponiveis() {
