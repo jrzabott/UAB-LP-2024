@@ -21,6 +21,10 @@ void menuUtilizadores();
 void menuEmprestimos();
 void menuRelatorios();
 
+void buscarLivrosPorTituloInterativo();
+void buscarLivrosPorAutorInterativo();
+
+
 int main() {
     inicializarLivros();
     inicializarUtilizadores();
@@ -180,7 +184,9 @@ void menuLivros() {
         printf("3. Atualizar Livro\n");
         printf("4. Listar Todos os Livros\n");
         printf("5. Listar Livros Disponíveis\n");
-        printf("6. Voltar\n");
+        printf("6. Buscar Livros por Título\n");
+        printf("7. Buscar Livros por Autor\n");
+        printf("8. Voltar\n");
         printf("Escolha uma opção: ");
         scanf("%d", &opcao);
         getchar();  // Consume newline left in the input buffer
@@ -202,13 +208,54 @@ void menuLivros() {
                 listarLivrosDisponiveis();
                 break;
             case 6:
-                return;  // Retorna ao menu principal
+                buscarLivrosPorTituloInterativo();
+                break;
+            case 7:
+                buscarLivrosPorAutorInterativo();
+                break;
+            case 8:
+               return;  // Retorna ao menu principal
             default:
                 printf("Opção inválida, tente novamente.\n");
         }
-    } while (opcao != 6);
+    } while (opcao != 7);
 }
 
+void buscarLivrosPorTituloInterativo() {
+    char titulo[100];
+    printf("Digite o título do livro a ser pesquisado: ");
+    fgets(titulo, 100, stdin);
+    titulo[strcspn(titulo, "\n")] = 0;  // Remove newline character
+
+    int count = 0;
+    Livro *livro = *buscarLivrosPorTitulo(titulo, &count);
+    if (count == 0) {
+        printf("Livro não encontrado.\n");
+        return; // retornar ao menu
+    }
+    for (int i = 0; i < count; i++) {
+        printf("ID: %d, Título: %s, Autor: %s, Gênero: %s, Exemplares Disponíveis: %d\n",
+               livro[i].idLivro, livro[i].titulo, livro[i].autor, livro[i].genero, livro[i].exemplaresDisponiveis);
+    }
+}
+
+void buscarLivrosPorAutorInterativo() {
+    int count = 0;
+    char autor[100];
+    printf("Digite o autor do livro a ser pesquisado: ");
+    fgets(autor, 100, stdin);
+    autor[strcspn(autor, "\n")] = 0;  // limpar NULL characater e fim de linha
+
+    Livro *livro = *buscarLivrosPorAutor(autor, &count);
+    if (count == 0) {
+        printf("Livro não encontrado.\n");
+        return; // retornar ao menu
+    }
+    for (int i = 0; i < count; i++) {
+        printf("ID: %d, Título: %s, Autor: %s, Gênero: %s, Exemplares Disponíveis: %d\n",
+               livro[i].idLivro, livro[i].titulo, livro[i].autor, livro[i].genero, livro[i].exemplaresDisponiveis);
+    }
+}
 
 void adicionarUtilizadorInterativo() {
     Utilizador novoUtilizador;

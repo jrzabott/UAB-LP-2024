@@ -99,7 +99,6 @@ void removerLivro(int idLivro) {
 
 Livro** buscarLivrosPorTitulo(const char *titulo, int *count) {
     Livro **resultados = malloc(sizeof(Livro*) * totalLivros);
-    *count = 0;
     for (int i = 0; i < totalLivros; i++) {
         if (strcmp(livros[i].titulo, titulo) == 0) {
             resultados[(*count)++] = &livros[i];
