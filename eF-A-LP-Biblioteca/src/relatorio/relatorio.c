@@ -79,6 +79,18 @@ int compararRelatorioUtilizadoresComMaisEmprestimos(const void *a, const void *b
 }
 
 void gerarRelatorioUtilizadoresComMaisEmprestimos() {
+    // nao faz nada caso nao hajam emprestimos
+    if (gestao->totalEmprestimos < 1) {
+        printf("Sem emprestimos para computar relatorio.");
+        return;
+    }
+
+    // nao faz nada caso nao hajam utilizadores
+    if (totalUtilizadores < 1) {
+        printf("Nao ha utilizadores registados para computar resultado.");
+        return;
+    }
+
     // Inicializa o array de RelatorioUtilizadoresComMaisEmprestimos
     RelatorioUtilizadoresComMaisEmprestimos *relatorio = (RelatorioUtilizadoresComMaisEmprestimos *) malloc(
             sizeof(RelatorioUtilizadoresComMaisEmprestimos) * totalUtilizadores);
@@ -110,5 +122,4 @@ void gerarRelatorioUtilizadoresComMaisEmprestimos() {
                relatorio[i].idUtilizador, listaUtilizadores[i].nome,
                listaUtilizadores[i].email, relatorio[i].totalEmprestimos);
     }
-    free(relatorio);
 }
