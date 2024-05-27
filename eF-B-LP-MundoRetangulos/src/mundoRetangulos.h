@@ -33,7 +33,7 @@ void aplicarGravidade(Retangulo* retangulo);
 void imprimirCenario();
 
 // Função para interpretar e executar comandos
-void executarComando(char* comando, Retangulo** retangulos, int* numRetangulos);
+void executarComando(char* comando);
 
 // Função para inicializar o array de retângulos
 void inicializarRetangulos();

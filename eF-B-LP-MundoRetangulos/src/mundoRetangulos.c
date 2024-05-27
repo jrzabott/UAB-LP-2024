@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "mundoRetangulos.h"
 
 Retangulo retangulos[MAX_RETANGULOS];
@@ -143,6 +144,13 @@ void imprimirCenario() {
 int moverDireita(int x, int y, int p) {
     for (int i = 0; i < contadorRetangulos; i++) {
         if (retangulos[i].x == x && retangulos[i].y == y) {
+            // verificar se ira ultrapassar os limites, caso positivo, apresentar mensagem de error e retornar 0
+            if (retangulos[i].x + retangulos[i].largura + p > MAX_X) {
+                printf("Erro: Retangulo (%d,%d,%d,%d) ultrapassa limite direito\n",
+                       retangulos[i].x, retangulos[i].y, retangulos[i].largura, retangulos[i].altura);
+                return 0;
+            }
+
             // verificar se ha intersecao com outros retangulos
             retangulos[i].x += p;
             for (int j = 0; j < contadorRetangulos; j++) {
@@ -172,6 +180,13 @@ int moverDireita(int x, int y, int p) {
 int moverEsquerda(int x, int y, int p) {
     for (int i = 0; i < contadorRetangulos; i++) {
         if (retangulos[i].x == x && retangulos[i].y == y) {
+            // verificar se ira ultrapassar os limites, caso positivo, apresentar mensagem de error e retornar 0
+            if (retangulos[i].x - p < 1) {
+                printf("Erro: Retangulo (%d,%d,%d,%d) ultrapassa limite esquerdo\n",
+                       retangulos[i].x, retangulos[i].y, retangulos[i].largura, retangulos[i].altura);
+                return 0;
+            }
+
             // verificar se ha intersecao com outros retangulos
             retangulos[i].x -= p;
             for (int j = 0; j < contadorRetangulos; j++) {
@@ -191,6 +206,46 @@ int moverEsquerda(int x, int y, int p) {
     }
     return 0;
 }
+
+// executar comando deve interpretar o comando informado e executar a acao correspondente
+// exemplos de comandos suportados:
+//  create x,y+l,h - cria um retângulo em que (x,y) são as coordenadas do canto inferior esquerdo e (l,h) o comprimento e altura, respetivamente.
+//  moveright x,y+p - desloca o retângulo situado nas coordenadas (x,y) para a direita p posições
+//  moveleft x,y+p - desloca o retângulo que contém o ponto (x,y) para a esquerda p posições
+// caso o comando seja invalido, exibir mensagem de erro
+// ao fim de cada comando deve imprimir o cenario atual
+void executarComando(char* comando) {
+    int x, y, largura, altura, p;
+    char acao[20];
+
+    // Verificar qual é o comando
+    if (sscanf(comando, "create %d,%d+%d,%d", &x, &y, &largura, &altura) == 4) {
+        // Criar retângulo
+        if (criarRetangulo(x, y, largura, altura)) {
+            imprimirCenario();
+        } else {
+            printf("Erro ao criar retângulo.\n");
+        }
+    } else if (sscanf(comando, "moveright %d,%d+%d", &x, &y, &p) == 3) {
+        // Mover retângulo para a direita
+        if (moverDireita(x, y, p)) {
+            imprimirCenario();
+        } else {
+            printf("Erro ao mover retângulo para a direita.\n");
+        }
+    } else if (sscanf(comando, "moveleft %d,%d+%d", &x, &y, &p) == 3) {
+        // Mover retângulo para a esquerda
+        if (moverEsquerda(x, y, p)) {
+            imprimirCenario();
+        } else {
+            printf("Erro ao mover retângulo para a esquerda.\n");
+        }
+    } else {
+        printf("Comando inválido.\n");
+    }
+}
+
+
 
 void inicializarRetangulos() {
     contadorRetangulos = 0;

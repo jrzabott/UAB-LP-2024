@@ -248,6 +248,77 @@ void test_moverParaEsquerdaUmRetanguloQueEstaSobreOutroFazComQueEsteCaiaAposUltr
     TEST_ASSERT_EQUAL(3, retangulo2->altura);
 }
 
+void test_moverUmRetanguloParaADireitaAteOLimiteEVerificarQueNaoUltrapassa(void) {
+    Retangulo *retangulo = criarRetangulo(75, 3, 5, 5);
+    moverDireita(75, 1, 5);
+    TEST_ASSERT_EQUAL(75, retangulo->x);
+    TEST_ASSERT_EQUAL(1, retangulo->y);
+    TEST_ASSERT_EQUAL(5, retangulo->largura);
+    TEST_ASSERT_EQUAL(5, retangulo->altura);
+}
+
+// teste para testar todos os formatos suportados para executarComando, e tambem como reage a erros e entradas invalidas.
+// formatos corretos suportados:
+//  create x,y+l,h - cria um retângulo em que (x,y) são as coordenadas do canto inferior esquerdo e (l,h) o comprimento e altura, respetivamente.
+//  moveright x,y+p - desloca o retângulo situado nas coordenadas (x,y) para a direita p posições
+//  moveleft x,y+p - desloca o retângulo que contém o ponto (x,y) para a esquerda p posições
+void test_executarComando(void) {
+    executarComando("create 1,3+12,5");
+    TEST_ASSERT_EQUAL(1, contadorRetangulos);
+    TEST_ASSERT_EQUAL(1, retangulos[0].x);
+    TEST_ASSERT_EQUAL(1, retangulos[0].y);
+    TEST_ASSERT_EQUAL(12, retangulos[0].largura);
+    TEST_ASSERT_EQUAL(5, retangulos[0].altura);
+
+    executarComando("moveright 1,1+5");
+    TEST_ASSERT_EQUAL(6, retangulos[0].x);
+    TEST_ASSERT_EQUAL(1, retangulos[0].y);
+    TEST_ASSERT_EQUAL(12, retangulos[0].largura);
+    TEST_ASSERT_EQUAL(5, retangulos[0].altura);
+
+    executarComando("moveleft 6,1+5");
+    TEST_ASSERT_EQUAL(1, retangulos[0].x);
+    TEST_ASSERT_EQUAL(1, retangulos[0].y);
+    TEST_ASSERT_EQUAL(12, retangulos[0].largura);
+    TEST_ASSERT_EQUAL(5, retangulos[0].altura);
+
+    executarComando("create 15,3+12,5");
+    TEST_ASSERT_EQUAL(2, contadorRetangulos);
+    TEST_ASSERT_EQUAL(15, retangulos[1].x);
+    TEST_ASSERT_EQUAL(1, retangulos[1].y);
+    TEST_ASSERT_EQUAL(12, retangulos[1].largura);
+    TEST_ASSERT_EQUAL(5, retangulos[1].altura);
+
+    executarComando("moveright 15,1+5");
+    TEST_ASSERT_EQUAL(20, retangulos[1].x);
+    TEST_ASSERT_EQUAL(1, retangulos[1].y);
+    TEST_ASSERT_EQUAL(12, retangulos[1].largura);
+    TEST_ASSERT_EQUAL(5, retangulos[1].altura);
+
+    executarComando("moveleft 20,1+5");
+    TEST_ASSERT_EQUAL(15, retangulos[1].x);
+    TEST_ASSERT_EQUAL(1, retangulos[1].y);
+    TEST_ASSERT_EQUAL(12, retangulos[1].largura);
+    TEST_ASSERT_EQUAL(5, retangulos[1].altura);
+
+    executarComando("create 26,8+12,5");
+    TEST_ASSERT_EQUAL(3, contadorRetangulos);
+    TEST_ASSERT_EQUAL(26, retangulos[2].x);
+    TEST_ASSERT_EQUAL(6, retangulos[2].y);
+    TEST_ASSERT_EQUAL(12, retangulos[2].largura);
+
+    executarComando("moveright 26,6+5");
+    TEST_ASSERT_EQUAL(31, retangulos[2].x);
+    TEST_ASSERT_EQUAL(1, retangulos[2].y);
+    TEST_ASSERT_EQUAL(12, retangulos[2].largura);
+    TEST_ASSERT_EQUAL(5, retangulos[2].altura);
+
+    executarComando("moveleft 31,1+5");
+    TEST_ASSERT_EQUAL(31, retangulos[2].x);
+    TEST_ASSERT_EQUAL(1, retangulos[2].y);
+    TEST_ASSERT_EQUAL(12, retangulos[2].largura);
+    TEST_ASSERT_EQUAL(5, retangulos[2].altura);
+}
 
 int main(void) {
     UNITY_BEGIN();
@@ -267,6 +338,8 @@ int main(void) {
     RUN_TEST(test_moverUmRetanguloParaADireitaNaoPermiteInterseccaoComOutroRetangulo);
     RUN_TEST(test_moverUmRetanguloParaAEsquerdaMoveORetangulo);
     RUN_TEST(test_moverParaEsquerdaUmRetanguloQueEstaSobreOutroFazComQueEsteCaiaAposUltrapassarLarguraDoRetanguloDeBaixo);
+    RUN_TEST(test_moverUmRetanguloParaADireitaAteOLimiteEVerificarQueNaoUltrapassa);
+    RUN_TEST(test_executarComando);
 
     // RUN_TEST(test_criar3RetangulosComDiferentesAlturasEscreverNoEcraParaConsultaDoCenario);
     return UNITY_END();
