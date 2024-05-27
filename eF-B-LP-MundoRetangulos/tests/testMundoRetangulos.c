@@ -1,0 +1,164 @@
+#include <stdlib.h>
+
+#include "unity/unity.h"
+#include "../src/mundoRetangulos.h"
+
+void setUp(void) {
+    inicializarRetangulos();
+}
+
+void tearDown(void) {
+    limparRetangulos();
+}
+
+void test_criarRetanguloDentroLimites(void) {
+    Retangulo *retangulo = criarRetangulo(1, 3, 12, 5);
+    TEST_ASSERT_NOT_NULL(retangulo);
+    TEST_ASSERT_EQUAL(1, retangulo->x);
+    TEST_ASSERT_EQUAL(3, retangulo->y);
+    TEST_ASSERT_EQUAL(12, retangulo->largura);
+    TEST_ASSERT_EQUAL(5, retangulo->altura);
+}
+
+void test_criarRetanguloForaLimites(void) {
+    Retangulo *retangulo = criarRetangulo(75, 3, 10, 5); // Ultrapassa o limite x=80
+    TEST_ASSERT_NULL(retangulo);
+}
+
+void test_interseta(void) {
+    Retangulo r1 = {1, 1, 5, 5};
+    Retangulo r2 = {3, 3, 5, 5}; // Intersecciona com r1
+    Retangulo r3 = {7, 7, 2, 2}; // Não intersecciona com r1
+
+    TEST_ASSERT_TRUE(interseta(&r1, &r2));
+    TEST_ASSERT_FALSE(interseta(&r1, &r3));
+}
+
+void test_aposCriarNovoRetanguloEsteFicaSalvoNoArray(void) {
+    Retangulo *retangulo = criarRetangulo(1, 3, 12, 5);
+    TEST_ASSERT_EQUAL(1, contadorRetangulos);
+    TEST_ASSERT_EQUAL(1, retangulos[0].x);
+    TEST_ASSERT_EQUAL(3, retangulos[0].y);
+    TEST_ASSERT_EQUAL(12, retangulos[0].largura);
+    TEST_ASSERT_EQUAL(5, retangulos[0].altura);
+}
+
+void test_criarDoisRetangulosDistintosAdicionaNoArrayENaoModificaORetanguloExistente(void) {
+    Retangulo *retangulo1 = criarRetangulo(1, 3, 12, 5);
+    Retangulo *retangulo2 = criarRetangulo(15, 3, 12, 5);
+
+    TEST_ASSERT_EQUAL(2, contadorRetangulos);
+    TEST_ASSERT_EQUAL(1, retangulos[0].x);
+    TEST_ASSERT_EQUAL(3, retangulos[0].y);
+    TEST_ASSERT_EQUAL(12, retangulos[0].largura);
+    TEST_ASSERT_EQUAL(5, retangulos[0].altura);
+    TEST_ASSERT_EQUAL(15, retangulos[1].x);
+    TEST_ASSERT_EQUAL(3, retangulos[1].y);
+    TEST_ASSERT_EQUAL(12, retangulos[1].largura);
+    TEST_ASSERT_EQUAL(5, retangulos[1].altura);
+}
+
+void test_criar3RetangulosSendoQueUmDelesInterseccionaComOsOutros(void) {
+    Retangulo *retangulo1 = criarRetangulo(1, 3, 12, 5);
+    Retangulo *retangulo2 = criarRetangulo(15, 3, 12, 5);
+    Retangulo *retangulo3 = criarRetangulo(10, 3, 12, 5); // Intersecciona com retangulo1
+
+    TEST_ASSERT_EQUAL(2, contadorRetangulos);
+    TEST_ASSERT_EQUAL(1, retangulos[0].x);
+    TEST_ASSERT_EQUAL(3, retangulos[0].y);
+    TEST_ASSERT_EQUAL(12, retangulos[0].largura);
+    TEST_ASSERT_EQUAL(5, retangulos[0].altura);
+    TEST_ASSERT_EQUAL(15, retangulos[1].x);
+    TEST_ASSERT_EQUAL(3, retangulos[1].y);
+    TEST_ASSERT_EQUAL(12, retangulos[1].largura);
+    TEST_ASSERT_EQUAL(5, retangulos[1].altura);
+}
+
+void test_aplicarGravidadeAUmRetangulo(void) {
+    Retangulo *retangulo = criarRetangulo(1, 3, 12, 5);
+    aplicarGravidade(retangulo);
+    TEST_ASSERT_EQUAL(1, retangulo->x);
+    TEST_ASSERT_EQUAL(1, retangulo->y);
+    TEST_ASSERT_EQUAL(12, retangulo->largura);
+    TEST_ASSERT_EQUAL(5, retangulo->altura);
+}
+
+void test_aplicarGravidadeADoisRetangulosLadoALado(void) {
+    Retangulo *retangulo1 = criarRetangulo(1, 3, 12, 5);
+    Retangulo *retangulo2 = criarRetangulo(15, 3, 12, 5);
+    aplicarGravidade(retangulo1);
+    aplicarGravidade(retangulo2);
+    TEST_ASSERT_EQUAL(1, retangulo1->x);
+    TEST_ASSERT_EQUAL(1, retangulo1->y);
+    TEST_ASSERT_EQUAL(12, retangulo1->largura);
+    TEST_ASSERT_EQUAL(5, retangulo1->altura);
+    TEST_ASSERT_EQUAL(15, retangulo2->x);
+    TEST_ASSERT_EQUAL(1, retangulo2->y);
+    TEST_ASSERT_EQUAL(12, retangulo2->largura);
+    TEST_ASSERT_EQUAL(5, retangulo2->altura);
+}
+
+void test_aplicarGravidadeADoisRetangulosUmSobreOOutroComMesmaLargura(void) {
+    Retangulo *retangulo1 = criarRetangulo(1, 3, 12, 5);
+    TEST_ASSERT_TRUE(retangulo1 == &retangulos[0]);
+    aplicarGravidade(retangulo1);
+    Retangulo *retangulo2 = criarRetangulo(1, 8, 12, 5);
+    aplicarGravidade(retangulo2);
+    TEST_ASSERT_EQUAL(1, retangulo1->x);
+    TEST_ASSERT_EQUAL(1, retangulo1->y);
+    TEST_ASSERT_EQUAL(12, retangulo1->largura);
+    TEST_ASSERT_EQUAL(5, retangulo1->altura);
+    TEST_ASSERT_EQUAL(1, retangulo2->x);
+    TEST_ASSERT_EQUAL(6, retangulo2->y);
+    TEST_ASSERT_EQUAL(12, retangulo2->largura);
+    TEST_ASSERT_EQUAL(5, retangulo2->altura);
+}
+
+void test_aplicarGravidadeATresRetangulosPrimeiroESegundoLadoALadoComAlturasDiferentesTerceiroNaoInterseccionaMasDeveCairSobreOMaisAlto() {
+    Retangulo *retangulo1 = criarRetangulo(1, 3, 12, 5);
+    Retangulo *retangulo2 = criarRetangulo(15, 10, 12, 7);
+    aplicarGravidade(retangulo1);
+    aplicarGravidade(retangulo2);
+    Retangulo *retangulo3 = criarRetangulo(10, 20, 12, 5);
+    aplicarGravidade(retangulo3);
+    TEST_ASSERT_EQUAL(1, retangulo1->x);
+    TEST_ASSERT_EQUAL(1, retangulo1->y);
+    TEST_ASSERT_EQUAL(12, retangulo1->largura);
+    TEST_ASSERT_EQUAL(5, retangulo1->altura);
+    TEST_ASSERT_EQUAL(15, retangulo2->x);
+    TEST_ASSERT_EQUAL(1, retangulo2->y);
+    TEST_ASSERT_EQUAL(12, retangulo2->largura);
+    TEST_ASSERT_EQUAL(7, retangulo2->altura);
+    TEST_ASSERT_EQUAL(10, retangulo3->x);
+    TEST_ASSERT_EQUAL(8, retangulo3->y);
+    TEST_ASSERT_EQUAL(12, retangulo3->largura);
+    TEST_ASSERT_EQUAL(5, retangulo3->altura);
+}
+
+// teste para criar 3 retangulos, aplicar gravidade e imprimir no ecra o cenarios
+void test_criar3RetangulosComDiferentesAlturasEscreverNoEcraParaConsultaDoCenario(void) {
+    Retangulo *retangulo1 = criarRetangulo(1, 3, 12, 5);
+    Retangulo *retangulo2 = criarRetangulo(15, 10, 12, 7);
+    aplicarGravidade(retangulo1);
+    aplicarGravidade(retangulo2);
+    Retangulo *retangulo3 = criarRetangulo(10, 20, 12, 5);
+    aplicarGravidade(retangulo3);
+    imprimirCenario(retangulos, contadorRetangulos);
+}
+
+int main(void) {
+    UNITY_BEGIN();
+    RUN_TEST(test_criarRetanguloDentroLimites);
+    RUN_TEST(test_criarRetanguloForaLimites);
+    RUN_TEST(test_aposCriarNovoRetanguloEsteFicaSalvoNoArray);
+    RUN_TEST(test_criarDoisRetangulosDistintosAdicionaNoArrayENaoModificaORetanguloExistente);
+    RUN_TEST(test_criar3RetangulosSendoQueUmDelesInterseccionaComOsOutros);
+    RUN_TEST(test_aplicarGravidadeAUmRetangulo);
+    RUN_TEST(test_aplicarGravidadeADoisRetangulosLadoALado);
+    RUN_TEST(test_aplicarGravidadeADoisRetangulosUmSobreOOutroComMesmaLargura);
+    RUN_TEST(test_aplicarGravidadeATresRetangulosPrimeiroESegundoLadoALadoComAlturasDiferentesTerceiroNaoInterseccionaMasDeveCairSobreOMaisAlto);
+    RUN_TEST(test_interseta);
+    RUN_TEST(test_criar3RetangulosComDiferentesAlturasEscreverNoEcraParaConsultaDoCenario);
+    return UNITY_END();
+}
+
