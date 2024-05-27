@@ -17,10 +17,10 @@ extern int contadorRetangulos;
 Retangulo* criarRetangulo(int x, int y, int largura, int altura);
 
 // Função para mover um retângulo para a direita
-int moverDireita(Retangulo** retangulos, int numRetangulos, int x, int y, int p);
+int moverDireita(int x, int y, int p);
 
 // Função para mover um retângulo para a esquerda
-int moverEsquerda(Retangulo** retangulos, int numRetangulos, int x, int y, int p);
+int moverEsquerda(int x, int y, int p);
 
 // Função para verificar interseção entre dois retângulos
 int interseta(Retangulo* r1, Retangulo* r2);

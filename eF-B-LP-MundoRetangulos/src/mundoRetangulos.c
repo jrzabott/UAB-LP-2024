@@ -28,24 +28,20 @@ Retangulo* criarRetangulo(int x, int y, int largura, int altura) {
 
     // Adicionar novo retangulo ao array e incrementar contador antes de retornar
     retangulos[contadorRetangulos++] = novoRetangulo;
+
+    // aplicar gravidade
+    aplicarGravidade(&retangulos[contadorRetangulos - 1]);
+
     return &retangulos[contadorRetangulos - 1];
 }
 
-int interseta(Retangulo *r1, Retangulo *r2) {
-    // verificar se larguras interseccionam
-    // primeira condição: r1 à esquerda de r2
-    // segunda condição: r2 à esquerda de r1
-    if (r1->x + r1->largura < r2->x || r2->x + r2->largura < r1->x) {
+// verificar se dois retangulos se intersectam
+// deve permitir que dois retangulos toquem seus lados, nao sobrepor, mas tocar.
+int interseta(Retangulo* r1, Retangulo* r2) {
+    if (r1->x + r1->largura <= r2->x || r1->x >= r2->x + r2->largura
+        || r1->y + r1->altura <= r2->y || r1->y >= r2->y + r2->altura) {
         return 0;
     }
-
-    // verificar se alturas interseccionam
-    // primeira condição: r1 acima de r2
-    // segunda condição: r2 acima de r1
-    if (r1->y + r1->altura < r2->y || r2->y + r2->altura < r1->y) {
-        return 0;
-    }
-
     return 1;
 }
 
@@ -82,9 +78,9 @@ void aplicarGravidade(Retangulo* retangulo) {
 // Linha unidades: 12345678901234567890
 // Linha dezednas: 0        1        2
 void imprimirCenario() {
-    char cenario[MAX_Y][MAX_X];
-    for (int i = 0; i < MAX_Y; i++) {
-        for (int j = 0; j < MAX_X; j++) {
+    char cenario[MAX_Y + 1][MAX_X + 1];
+    for (int i = 0; i < MAX_Y + 1; i++) {
+        for (int j = 0; j < MAX_X + 1; j++) {
             cenario[i][j] = '-';
         }
     }
@@ -108,25 +104,27 @@ void imprimirCenario() {
     }
 
     // imprimir cenario, porem adicionar a numeracao do eixo Y nas duas primeiras posicoes de cada linha e um
-    // espaco imediatamente depois
-    for (int i = MAX_Y - 1; i >= 0; i--) {
+    // espaco imediatamente depois.
+    // adicionar tambem uma linha extra para termos o numero 25 no eixo Y
+    for (int i = MAX_Y; i >= 0; i--) {
         printf("%2d ", i);
-        for (int j = 0; j < MAX_X; j++) {
+        for (int j = 0; j < MAX_X + 1; j++) {
             printf("%c", cenario[i][j]);
         }
         printf("\n");
     }
 
     //imprimir linha das unidades do eixo X
+    // imprime tambem uma coluna extra para fazer com que a numeracao do eixo-X va ate o numero 80.
     printf("   "); // 3 espacos para alinhar com a linha das dezenas
-    for (int i = 0; i < MAX_X; i++) {
+    for (int i = 0; i < MAX_X + 1; i++) {
         printf("%d", i % 10);
     }
     printf("\n");
 
     //imprimir linha das dezenas do eixo X
     printf("   "); // 3 espacos para alinhar com a linha das unidades
-    for (int i = 0; i < MAX_X; i++) {
+    for (int i = 0; i < MAX_X + 1; i++) {
         if (i % 10 == 0) {
             printf("%d", i / 10);
         } else {
@@ -134,6 +132,64 @@ void imprimirCenario() {
         }
     }
     printf("\n");
+}
+
+// mover um retangulo para a direita:
+// deve pesquisar no array de retangulo o retangulo que se encontra nas coordenadas x e y informadas
+// verificar se ao mover para direita nao havera intersectacao com outro retangulo
+// caso nao haja, mover o retangulo para a direita, e em seguida tentamos aplicar a gravidade
+// deve retornar 1 se o movimento foi bem sucedido, e 0 caso contrario
+// caso nao seja possivel mover para direita, exibir mensagem de erro, antes de retornar 0
+int moverDireita(int x, int y, int p) {
+    for (int i = 0; i < contadorRetangulos; i++) {
+        if (retangulos[i].x == x && retangulos[i].y == y) {
+            // verificar se ha intersecao com outros retangulos
+            retangulos[i].x += p;
+            for (int j = 0; j < contadorRetangulos; j++) {
+                if (i != j && interseta(&retangulos[i], &retangulos[j])) {
+                    printf("Erro: Retangulo (%d,%d,%d,%d) intersecciona com retangulo (%d,%d,%d,%d)\n",
+                           retangulos[i].x, retangulos[i].y, retangulos[i].largura, retangulos[i].altura,
+                           retangulos[j].x, retangulos[j].y, retangulos[j].largura, retangulos[j].altura);
+                    retangulos[i].x -= p;
+                    return 0;
+                }
+            }
+
+            // aplicar gravidade
+            aplicarGravidade(&retangulos[i]);
+            return 1;
+        }
+    }
+    return 0;
+}
+
+// mover um retangulo para a esquerda:
+// deve pesquisar no array de retangulo o retangulo que se encontra nas coordenadas x e y informadas
+// verificar se ao mover para esquerda nao havera intersectacao com outro retangulo
+// caso nao haja, mover o retangulo para a esquerda, e em seguida tentamos aplicar a gravidade
+// deve retornar 1 se o movimento foi bem sucedido, e 0 caso contrario
+// caso nao seja possivel mover para esquerda, exibir mensagem de erro, antes de retornar 0
+int moverEsquerda(int x, int y, int p) {
+    for (int i = 0; i < contadorRetangulos; i++) {
+        if (retangulos[i].x == x && retangulos[i].y == y) {
+            // verificar se ha intersecao com outros retangulos
+            retangulos[i].x -= p;
+            for (int j = 0; j < contadorRetangulos; j++) {
+                if (i != j && interseta(&retangulos[i], &retangulos[j])) {
+                    printf("Erro: Retangulo (%d,%d,%d,%d) intersecciona com retangulo (%d,%d,%d,%d)\n",
+                           retangulos[i].x, retangulos[i].y, retangulos[i].largura, retangulos[i].altura,
+                           retangulos[j].x, retangulos[j].y, retangulos[j].largura, retangulos[j].altura);
+                    retangulos[i].x += p;
+                    return 0;
+                }
+            }
+
+            // aplicar gravidade
+            aplicarGravidade(&retangulos[i]);
+            return 1;
+        }
+    }
+    return 0;
 }
 
 void inicializarRetangulos() {
