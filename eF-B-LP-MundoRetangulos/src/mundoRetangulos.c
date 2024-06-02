@@ -3,267 +3,355 @@
 #include <string.h>
 #include "mundoRetangulos.h"
 
-Retangulo retangulos[MAX_RETANGULOS];
+Retangulo *retangulos;
 int contadorRetangulos = 0;
 
-Retangulo* criarRetangulo(int x, int y, int largura, int altura) {
-    if (x < 1 || y < 1 || x + largura > MAX_X || y + altura > MAX_Y) {
-        printf("Fora dos limites: x=[1,%d], y=[1,%d]\n", MAX_X, MAX_Y);
-        return NULL; // Fora dos limites
+int checarSobreposicao(Retangulo *novoRetangulo, Retangulo *retangulo);
+int intersetaExceto(Retangulo *retangulo, int indexAIgnorar);
+void aplicarGravidadeEmTodos();
+Retangulo aplicarGravidadeIgnorarIntersecaoCom(Retangulo retangulo, int indexAIgnorar);
+
+
+// Este metodo faz 3 coisas:
+// 1. Cria um novo retangulo
+// 2. Realoca o array de retangulos para acomodar o novo retangulo e incrementa o contador de retangulos
+// 3. Aplica Gravidade no novo retangulo, para que este esteja salvo na posição correta
+// retorna -1 se nao for possivel criar o retangulo, do contrario, retorna o index do retangulo no array de retangulos
+int criarRetangulo(int x, int y, int largura, int altura) {
+    // Verificar validade dos parametros. Retornar NULL se invalidos.
+    // 1. X e Y devem ser positivos e dentro dos limites
+    if (x < 0 || y < 0 || x >= MAX_X || y >= MAX_Y) {
+        return -1;
+    }
+    // 2. Largura e Altura devem ser positivos e dentro dos limites
+    if (largura <= 0 || altura <= 0 || largura > MAX_X || altura > MAX_Y) {
+        return -1;
+    }
+    // 3. A soma de X e Largura deve ser menor que MAX_X
+    if (x + largura > MAX_X) {
+        return -1;
+    }
+    // 4. A soma de Y e Altura deve ser menor que MAX_Y
+    if (y + altura > MAX_Y) {
+        return -1;
     }
 
-    Retangulo novoRetangulo;
-    novoRetangulo.x = x;
-    novoRetangulo.y = y;
-    novoRetangulo.largura = largura;
-    novoRetangulo.altura = altura;
+    // Criar um novo retângulo
+    Retangulo novoRetangulo = {x, y, largura, altura};
 
-    // Verificar se ha intersecao com outros retangulos
-    for (int i = 0; i < contadorRetangulos; i++) {
-        if (interseta(&novoRetangulo, &retangulos[i])) {
-            printf("Erro: Retangulo (%d,%d,%d,%d) intersecciona com retangulo (%d,%d,%d,%d)\n",
-                   x, y, largura, altura, retangulos[i].x, retangulos[i].y, retangulos[i].largura, retangulos[i].altura);
-            return NULL; // Intersecao com outro retangulo
-        }
+    // Verificar se existe interseção com outros retângulos antes de aplicar gravidade e salvar no array.
+    // Se houver interseção, devemos imprimir uma mensagem de erro e retornar -1.
+    // A mensagem de erro sera delegada ao metodo interseta.
+    if (interseta(&novoRetangulo)) {
+        // mensagem de interseção contendo informacoes sobre o retangulo que causou a interseção, e o retangulo interseptado
+        printf("Interseção com retângulo em (%d, %d) com largura %d e altura %d\n",
+               novoRetangulo.x, novoRetangulo.y,novoRetangulo.largura, novoRetangulo.altura);
+        return -1;
     }
 
-    // Adicionar novo retangulo ao array e incrementar contador antes de retornar
-    retangulos[contadorRetangulos++] = novoRetangulo;
+    // Aplicar Gravidade antes de adicionar o novo retangulo.
+    novoRetangulo = aplicarGravidade(novoRetangulo);
 
-    // aplicar gravidade
-    aplicarGravidade(&retangulos[contadorRetangulos - 1]);
+    // Realocar o array de retângulos para acomodar o novo retângulo
+    retangulos = realloc(retangulos, sizeof(Retangulo) * (contadorRetangulos + 1));
+    if (retangulos == NULL) {
+        printf("Erro ao alocar memória para o novo retângulo\n");
+        return -1;
+    }
 
-    return &retangulos[contadorRetangulos - 1];
+    // Adicionar o novo retângulo ao array de retângulos
+    retangulos[contadorRetangulos] = novoRetangulo;
+
+    // Retornar a referência para o novo retângulo, no array de retângulos e incrementar o contador de retângulos
+    return contadorRetangulos++;
 }
 
-// verificar se dois retangulos se intersectam
-// deve permitir que dois retangulos toquem seus lados, nao sobrepor, mas tocar.
-int interseta(Retangulo* r1, Retangulo* r2) {
-    if (r1->x + r1->largura <= r2->x || r1->x >= r2->x + r2->largura
-        || r1->y + r1->altura <= r2->y || r1->y >= r2->y + r2->altura) {
-        return 0;
-    }
-    return 1;
-}
+// Este metodo recebe um retangulo, e aplica a gravidade. Retorna um novo retangulo com a gravidade aplicada.
+Retangulo aplicarGravidade(Retangulo retangulo) {
+    // como este metodo deve retornar um novo retangulo, vamos criar um novo retangulo
+    Retangulo novoRetangulo = {retangulo.x, retangulo.y, retangulo.largura, retangulo.altura};
 
-void aplicarGravidade(Retangulo* retangulo) {
-    // verificar em todos os retangulos existentes, a maior altura ocupada (afinal, nosso novo retangulo ha de cair
-    // em maxY.
-    int maxY = 1;
-    for (int i = 0; i < contadorRetangulos; i++) {
-        // se o retangulo que estamos a testar for o mesmo que estamos a tentar aplicar a gravidade, passar para o proximo.
-        if (retangulo == &retangulos[i])
-            continue;
+    // se o retangulo estiver no chão, não aplicar gravidade
+    if (novoRetangulo.y == 0)
+        return novoRetangulo;
 
-        if (retangulo->x + retangulo->largura > retangulos[i].x
-            && retangulo->x < retangulos[i].x + retangulos[i].largura) {
-            if (retangulos[i].y + retangulos[i].altura > maxY) {
-                maxY = retangulos[i].y + retangulos[i].altura;
-            }
+    // A aplicacao da gravidade deve ser feita de forma que:
+    // 1. O retangulo deve ser movido para baixo, até que esteja no chao ou sobre outro retangulo.
+    // 2. Se o retangulo estiver sobre outro retangulo, ele deve parar de cair.
+    for (int i = novoRetangulo.y - 1; i >= 0; i--) {
+        novoRetangulo.y = i;
+        if (interseta(&novoRetangulo)) {
+            novoRetangulo.y++;
+            break;
         }
     }
-
-    // descer para maximo Y desocupado
-    retangulo->y = maxY;
+    return novoRetangulo;
 }
 
-// metodo imprimir cenario serve para escrever no ecrã o estado actual do mundo dos retangulos.
-// os retangulos sao representados em seus limites por letras X, e seu interior e preenchido com letras O
-// espacos vazios sao representados por hifen "-"
-// y=0, deve ficar embaixo, e y=MAX_Y deve ficar em cima
-// devemos tambem imprimir uma linha vertical com os valores de 1
-// e duas linhas abaixo do output para representar o eixo X
-// a primeira linha representa as unidades com caracateres de 0123456789
-// a segunda linha representa as dezenas, com espacos vazios entre os numeros das dezenas
-// exemplo:
-// Linha unidades: 12345678901234567890
-// Linha dezednas: 0        1        2
-void imprimirCenario() {
-    char cenario[MAX_Y + 1][MAX_X + 1];
-    for (int i = 0; i < MAX_Y + 1; i++) {
-        for (int j = 0; j < MAX_X + 1; j++) {
-            cenario[i][j] = '-';
+
+
+// Este metodo ira inicializar o array de retangulos
+void inicializarRetangulos() {
+    retangulos = malloc(sizeof(Retangulo)); // Alocar memória para o array de retângulos
+    contadorRetangulos = 0;
+}
+
+// Este metodo ira limpar o array de retangulos
+void limparRetangulos() {
+    free(retangulos); // Liberar a memória alocada para o array de retângulos
+    contadorRetangulos = 0;
+}
+
+int interseta(Retangulo *retangulo) {
+    // Aqui iremos verificar, se o retangulo informado, intersepta com algum outro retangulo no array de retangulos.
+    // Se houver interseção, devemos retornar 1, caso contrário, retornar 0.
+    for (int i = 0; i < contadorRetangulos; ++i) {
+        if (checarSobreposicao(retangulo, &retangulos[i]) > 0)
+            return 1;
+    }
+    return 0; // Não houve interseção com nenhum dos retangulos existentes
+}
+
+// os retangulos devem ter o perimetro represetados por X
+// os retangulos devem ter o interior representado por O
+// os espacos vazios serao representados por .
+// devemos imprimir uma matriz de 80x25
+// devemos imprimir tambem eixo-x e eixo-y
+// Exemplo": para um retangulo de 10x5, com x=5 e y=5
+// 25................................................................................
+// 24................................................................................
+// 23................................................................................
+// 22................................................................................
+// 21................................................................................
+// 20................................................................................
+// 19................................................................................
+// 18................................................................................
+// 17................................................................................
+// 16................................................................................
+// 15................................................................................
+// 14................................................................................
+// 13................................................................................
+// 12................................................................................
+// 11................................................................................
+// 10................................................................................
+//  9................................................................................
+//  8................................................................................
+//  7................................................................................
+//  6................................................................................
+//  5.....XXXXXXXXXX.................................................................
+//  4.....XOOOOOOOOX.................................................................
+//  3.....XOOOOOOOOX.................................................................
+//  2.....XOOOOOOOOX.................................................................
+//  1.....XXXXXXXXXX.................................................................
+//  0---------10--------20--------30--------40--------50--------60--------70--------80
+//  0123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789
+void imprimirCenario(Retangulo *retangulos, int numRetangulos) {
+    // preparar a matriz de 80x25
+    char matriz[MAX_Y][MAX_X];
+    for (int i = 0; i < MAX_Y; i++) {
+        for (int j = 0; j < MAX_X; j++) {
+            matriz[i][j] = '.';
         }
     }
+    // se retangulos for NULL, algo esta errado. Imprimir mensagem de erro e retornar
+    if (retangulos == NULL) {
+        printf("Erro ao imprimir cenário\n");
+        return;
+    }
 
-    // desenhar retangulos
-    // Big O notation: O(n^3) - pessimo. Mas para o nosso caso, n é pequeno, entao nao ha problema.
-    for (int i = 0; i < contadorRetangulos; i++) {
-        // desenhar linha vertical
+    // preencher a matriz com os retangulos
+    for (int i = 0; i < numRetangulos; i++) {
         for (int j = retangulos[i].y; j < retangulos[i].y + retangulos[i].altura; j++) {
-            // desenhar linha horizontal
             for (int k = retangulos[i].x; k < retangulos[i].x + retangulos[i].largura; k++) {
-                // se estamos na linha vertical ou horizontal, desenhar X
-                if (j == retangulos[i].y || j == retangulos[i].y + retangulos[i].altura - 1
-                    || k == retangulos[i].x || k == retangulos[i].x + retangulos[i].largura - 1) {
-                    cenario[j][k] = 'X';
-                } else { // senao, desenhar O para o interior do retangulo
-                    cenario[j][k] = 'O';
+                if (j == retangulos[i].y || j == retangulos[i].y + retangulos[i].altura - 1 || k == retangulos[i].x || k == retangulos[i].x + retangulos[i].largura - 1) {
+                    matriz[j][k] = 'X';
+                } else {
+                    matriz[j][k] = 'O';
                 }
             }
         }
     }
 
-    // imprimir cenario, porem adicionar a numeracao do eixo Y nas duas primeiras posicoes de cada linha e um
-    // espaco imediatamente depois.
-    // adicionar tambem uma linha extra para termos o numero 25 no eixo Y
-    for (int i = MAX_Y; i >= 0; i--) {
+    // imprimir a matriz tendo em consideracao o formato do eixo-y em cada linha
+    for (int i = MAX_Y - 1; i >= 0; i--) {
         printf("%2d ", i);
-        for (int j = 0; j < MAX_X + 1; j++) {
-            printf("%c", cenario[i][j]);
+        for (int j = 0; j < MAX_X; j++) {
+            printf("%c", matriz[i][j]);
         }
         printf("\n");
     }
 
-    //imprimir linha das unidades do eixo X
-    // imprime tambem uma coluna extra para fazer com que a numeracao do eixo-X va ate o numero 80.
-    printf("   "); // 3 espacos para alinhar com a linha das dezenas
+    // imprimir o eixo-x conforme formato de duas linhas no exemplo acima
+    printf("   ");
+    for (int i = 0; i < MAX_X + 1; i++) {
+        if (i % 10 == 0)
+            printf("%d", i % 100 / 10);
+        else
+            printf(" ");
+    }
+    printf("\n   ");
     for (int i = 0; i < MAX_X + 1; i++) {
         printf("%d", i % 10);
     }
     printf("\n");
-
-    //imprimir linha das dezenas do eixo X
-    printf("   "); // 3 espacos para alinhar com a linha das unidades
-    for (int i = 0; i < MAX_X + 1; i++) {
-        if (i % 10 == 0) {
-            printf("%d", i / 10);
-        } else {
-            printf(" ");
-        }
-    }
-    printf("\n");
 }
 
-// mover um retangulo para a direita:
-// deve pesquisar no array de retangulo o retangulo que se encontra nas coordenadas x e y informadas
-// verificar se ao mover para direita nao havera intersectacao com outro retangulo
-// caso nao haja, mover o retangulo para a direita, e em seguida tentamos aplicar a gravidade
-// deve retornar 1 se o movimento foi bem sucedido, e 0 caso contrario
-// caso nao seja possivel mover para direita, exibir mensagem de erro, antes de retornar 0
 int moverDireita(int x, int y, int p) {
+    // verificar se exite um retangulo que o ponto x,y pertence
     for (int i = 0; i < contadorRetangulos; i++) {
-        if (retangulos[i].x == x && retangulos[i].y == y) {
-            // verificar se ira ultrapassar os limites, caso positivo, apresentar mensagem de error e retornar 0
-            if (retangulos[i].x + retangulos[i].largura + p > MAX_X) {
-                printf("Erro: Retangulo (%d,%d,%d,%d) ultrapassa limite direito\n",
-                       retangulos[i].x, retangulos[i].y, retangulos[i].largura, retangulos[i].altura);
+        if (x >= retangulos[i].x && x < retangulos[i].x + retangulos[i].largura // x está dentro do retangulo
+        && y >= retangulos[i].y && y < retangulos[i].y + retangulos[i].altura)  // y está dentro do retangulo
+        {
+            Retangulo novoRetangulo = {retangulos[i].x + p, retangulos[i].y, retangulos[i].largura, retangulos[i].altura};
+            // verificar se o retangulo quando movido para a direita esta numa posicao valida
+            if (novoRetangulo.x + novoRetangulo.largura > MAX_X) {
                 return 0;
             }
 
-            // verificar se ha intersecao com outros retangulos
-            retangulos[i].x += p;
-            for (int j = 0; j < contadorRetangulos; j++) {
-                if (i != j && interseta(&retangulos[i], &retangulos[j])) {
-                    printf("Erro: Retangulo (%d,%d,%d,%d) intersecciona com retangulo (%d,%d,%d,%d)\n",
-                           retangulos[i].x, retangulos[i].y, retangulos[i].largura, retangulos[i].altura,
-                           retangulos[j].x, retangulos[j].y, retangulos[j].largura, retangulos[j].altura);
-                    retangulos[i].x -= p;
-                    return 0;
-                }
+            // verificar se o retangulo pode ser movido para a nova posicao e nao ha intersecao
+            if (!intersetaExceto(&novoRetangulo, i)) {
+                retangulos[i] = aplicarGravidade(novoRetangulo);
+                aplicarGravidadeEmTodos();
+                return 1;
             }
-
-            // aplicar gravidade
-            aplicarGravidade(&retangulos[i]);
-            return 1;
         }
     }
     return 0;
 }
 
-// mover um retangulo para a esquerda:
-// deve pesquisar no array de retangulo o retangulo que se encontra nas coordenadas x e y informadas
-// verificar se ao mover para esquerda nao havera intersectacao com outro retangulo
-// caso nao haja, mover o retangulo para a esquerda, e em seguida tentamos aplicar a gravidade
-// deve retornar 1 se o movimento foi bem sucedido, e 0 caso contrario
-// caso nao seja possivel mover para esquerda, exibir mensagem de erro, antes de retornar 0
 int moverEsquerda(int x, int y, int p) {
+    // verificar se exite um retangulo que o ponto x,y pertence
     for (int i = 0; i < contadorRetangulos; i++) {
-        if (retangulos[i].x == x && retangulos[i].y == y) {
-            // verificar se ira ultrapassar os limites, caso positivo, apresentar mensagem de error e retornar 0
-            if (retangulos[i].x - p < 1) {
-                printf("Erro: Retangulo (%d,%d,%d,%d) ultrapassa limite esquerdo\n",
-                       retangulos[i].x, retangulos[i].y, retangulos[i].largura, retangulos[i].altura);
+        if (x >= retangulos[i].x && x < retangulos[i].x + retangulos[i].largura // x está dentro do retangulo
+        && y >= retangulos[i].y && y < retangulos[i].y + retangulos[i].altura)  // y está dentro do retangulo
+        {
+            Retangulo novoRetangulo = {retangulos[i].x - p, retangulos[i].y, retangulos[i].largura, retangulos[i].altura};
+            // verificar se o retangulo quando movido para a esquerda esta numa posicao valida
+            if (novoRetangulo.x < 0) {
                 return 0;
             }
 
-            // verificar se ha intersecao com outros retangulos
-            retangulos[i].x -= p;
-            for (int j = 0; j < contadorRetangulos; j++) {
-                if (i != j && interseta(&retangulos[i], &retangulos[j])) {
-                    printf("Erro: Retangulo (%d,%d,%d,%d) intersecciona com retangulo (%d,%d,%d,%d)\n",
-                           retangulos[i].x, retangulos[i].y, retangulos[i].largura, retangulos[i].altura,
-                           retangulos[j].x, retangulos[j].y, retangulos[j].largura, retangulos[j].altura);
-                    retangulos[i].x += p;
-                    return 0;
-                }
+            // verificar se o retangulo pode ser movido para a nova posicao e nao ha intersecao
+            if (!intersetaExceto(&novoRetangulo, i)) {
+                retangulos[i] = aplicarGravidade(novoRetangulo);
+                aplicarGravidadeEmTodos();
+                return 1;
             }
-
-            // aplicar gravidade
-            aplicarGravidade(&retangulos[i]);
-            return 1;
         }
     }
     return 0;
 }
 
-// executar comando deve interpretar o comando informado e executar a acao correspondente
-// exemplos de comandos suportados:
-//  create x,y+l,h - cria um retângulo em que (x,y) são as coordenadas do canto inferior esquerdo e (l,h) o comprimento e altura, respetivamente.
-//  moveright x,y+p - desloca o retângulo situado nas coordenadas (x,y) para a direita p posições
-//  moveleft x,y+p - desloca o retângulo que contém o ponto (x,y) para a esquerda p posições
-// caso o comando seja invalido, exibir mensagem de erro
-// ao fim de cada comando deve imprimir o cenario atual
-void executarComando(char* comando) {
-    int x, y, largura, altura, p;
-    char acao[20];
+int checarSobreposicao(Retangulo *novoRetangulo, Retangulo *retangulo) {
+    if (novoRetangulo->x < retangulo->x + retangulo->largura // lado esquerdo do novoRetangulo está à esquerda do lado direito do retangulo
+        && novoRetangulo->x + novoRetangulo->largura > retangulo->x // lado direito do novoRetangulo está à direita do lado esquerdo do retangulo
+        && novoRetangulo->y < retangulo->y + retangulo->altura // lado inferior do novoRetangulo está abaixo do lado superior do retangulo
+        && novoRetangulo->y + novoRetangulo->altura > retangulo->y) // lado superior do novoRetangulo está acima do lado inferior do retangulo
+        return 1; // Há sobreposição
+    return 0;
+}
 
-    // Verificar qual é o comando
+int intersetaExceto(Retangulo *retangulo, int indexAIgnorar) {
+    // index invalido
+    if (indexAIgnorar < 0 || indexAIgnorar >= contadorRetangulos)
+        return 0;
+
+    // Aqui iremos verificar, se o retangulo informado, intersepta com algum outro retangulo no array de retangulos.
+    // Se houver interseção, devemos retornar 1, caso contrário, retornar 0.
+    for (int i = 0; i < contadorRetangulos; ++i) {
+        if (i == indexAIgnorar)
+            continue;
+        if (checarSobreposicao(retangulo, &retangulos[i]) > 0)
+            return 1;
+    }
+    return 0; // Não houve interseção com nenhum dos retangulos existentes
+}
+
+void aplicarGravidadeEmTodos() {
+    for (int i = 0; i < contadorRetangulos; i++) {
+        retangulos[i] = aplicarGravidadeIgnorarIntersecaoCom(retangulos[i], i);
+    }
+}
+
+Retangulo aplicarGravidadeIgnorarIntersecaoCom(Retangulo retangulo, int indexAIgnorar) {
+        Retangulo novoRetangulo = {retangulo.x, retangulo.y, retangulo.largura, retangulo.altura};
+
+        // se o retangulo estiver no chão, não aplicar gravidade
+        if (novoRetangulo.y == 0)
+            return novoRetangulo;
+
+        // A aplicacao da gravidade deve ser feita de forma que:
+        // 1. O retangulo deve ser movido para baixo, até que esteja no chao ou sobre outro retangulo.
+        // 2. Se o retangulo estiver sobre outro retangulo, ele deve parar de cair.
+        for (int i = novoRetangulo.y - 1; i >= 0; i--) {
+            novoRetangulo.y = i;
+            if (intersetaExceto(&novoRetangulo, indexAIgnorar)) {
+                novoRetangulo.y++;
+                break;
+            }
+        }
+        return novoRetangulo;
+}
+
+void executarComando(char* comando) {
+    // Os comandos possíveis são:
+    // 1. "create x,y+largura,altura" - cria um novo retângulo nas coordenadas x,y com largura e altura especificadas
+    // 2. "moveright x,y+p" - move o retângulo que contém o ponto x,y para a direita p posições
+    // 3. "moveleft x,y+p" - move o retângulo que contém o ponto x,y para a esquerda p posições
+    // Ao fim da execucao de cada comando, o cenário deve ser impresso
+
+    // verificar se comando esta em um dos 3 formatos validos.
+    // deve contar create, moveright ou moveleft como primeira palavra
+    // deve conter um espaco imediaamente apos a primeira palavra
+    // deve conter 4 numeros inteiros se a palavra inicial for create, ou 3 numeros inteiros se for moveright ou moveleft
+    // os dois primeiros numeros devem ser sempre separados por virgula
+    // o terceiro numero e sempre separado por um sinal de +
+    // o quarto numero e sempre um numero inteiro e separado por virgula do terceiro
+    // os numeros devem ser positivos
+    // os numeros devem estar dentro dos limites do mundo de retangulos
+
+    // um ponto de atencao, como estamos a trabalhar com arrays com indices zero, todas as vezes que o
+    // usuario informar um ponto, devemos subtrair 1 do valor informado, para que o ponto seja valido no array
+    // e essa subtracao seja invisivel ao usuario
+    int x, y, largura, altura, p;
     if (sscanf(comando, "create %d,%d+%d,%d", &x, &y, &largura, &altura) == 4) {
-        // Criar retângulo
-        if (criarRetangulo(x, y, largura, altura)) {
-            imprimirCenario();
+        if (x < 0 || y < 0 || largura <= 0 || altura <= 0 || x + largura > MAX_X || y + altura > MAX_Y) {
+            printf("Comando inválido\n");
+            return;
+        }
+        if (criarRetangulo(x - 1, y - 1, largura, altura) == -1) {
+            printf("Erro ao criar retângulo\n");
+            return;
         } else {
-            printf("Erro ao criar retângulo.\n");
+            imprimirCenario(retangulos, contadorRetangulos);
         }
     } else if (sscanf(comando, "moveright %d,%d+%d", &x, &y, &p) == 3) {
-        // Mover retângulo para a direita
-        if (moverDireita(x, y, p)) {
-            imprimirCenario();
+        if (x < 0 || y < 0 || p <= 0 || x >= MAX_X || y >= MAX_Y) {
+            printf("Comando inválido\n");
+            return;
+        }
+        if (!moverDireita(x - 1, y - 1, p)) {
+            printf("Erro ao mover retângulo para a direita\n");
+            return;
         } else {
-            printf("Erro ao mover retângulo para a direita.\n");
+            imprimirCenario(retangulos, contadorRetangulos);
         }
     } else if (sscanf(comando, "moveleft %d,%d+%d", &x, &y, &p) == 3) {
-        // Mover retângulo para a esquerda
-        if (moverEsquerda(x, y, p)) {
-            imprimirCenario();
+        if (x < 0 || y < 0 || p <= 0 || x >= MAX_X || y >= MAX_Y) {
+            printf("Comando inválido\n");
+            return;
+        }
+        if (!moverEsquerda(x - 1, y - 1, p)) {
+            printf("Erro ao mover retângulo para a esquerda\n");
+            return;
         } else {
-            printf("Erro ao mover retângulo para a esquerda.\n");
+            imprimirCenario(retangulos, contadorRetangulos);
         }
     } else {
-        printf("Comando inválido.\n");
+        printf("Comando inválido\n");
+        return;
     }
 }
 
 
 
-void inicializarRetangulos() {
-    contadorRetangulos = 0;
-    // Limpar array de retangulos
-    for (int i = 0; i < MAX_RETANGULOS; i++) {
-        retangulos[i].x = 0;
-        retangulos[i].y = 0;
-        retangulos[i].largura = 0;
-        retangulos[i].altura = 0;
-    }
-}
-
-void limparRetangulos() {
-    for (int i = 0; i < MAX_RETANGULOS; i++) {
-        retangulos[i].x = 0;
-        retangulos[i].y = 0;
-        retangulos[i].largura = 0;
-        retangulos[i].altura = 0;
-    }
-    contadorRetangulos = 0;
-}

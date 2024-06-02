@@ -12,247 +12,312 @@ void tearDown(void) {
 }
 
 void test_criarRetanguloForaLimites(void) {
-    Retangulo *retangulo = criarRetangulo(75, 3, 10, 5); // Ultrapassa o limite x=80
-    TEST_ASSERT_NULL(retangulo);
-}
-
-void test_interseta(void) {
-    Retangulo r1 = {1, 1, 5, 5};
-    Retangulo r2 = {3, 3, 5, 5}; // Intersecciona com r1
-    Retangulo r3 = {7, 7, 2, 2}; // Não intersecciona com r1
-
-    TEST_ASSERT_TRUE(interseta(&r1, &r2));
-    TEST_ASSERT_FALSE(interseta(&r1, &r3));
-}
-
-void test_insersetaDevePermitirQueDoisRetangulosToquemSeusLados(void) {
-    Retangulo r1 = {1, 1, 5, 5};
-    Retangulo r2 = {6, 1, 5, 5}; // Não intersecciona com r1
-    Retangulo r3 = {6, 6, 2, 2}; // Não intersecciona com r1
-
-    TEST_ASSERT_FALSE(interseta(&r1, &r2));
-    TEST_ASSERT_FALSE(interseta(&r1, &r3));
+    int retanguloIndex = criarRetangulo(75, 3, 10, 5); // Ultrapassa o limite
+    TEST_ASSERT_EQUAL(-1, retanguloIndex);
 }
 
 void test_aposCriarNovoRetanguloEsteFicaSalvoNoArray(void) {
-    Retangulo *retangulo = criarRetangulo(1, 3, 12, 5);
+    int retanguloIndex = criarRetangulo(0, 0, 10, 5);
+    TEST_ASSERT_EQUAL(0, retanguloIndex);
     TEST_ASSERT_EQUAL(1, contadorRetangulos);
-    TEST_ASSERT_EQUAL(1, retangulos[0].x);
-    TEST_ASSERT_EQUAL(1, retangulos[0].y);
-    TEST_ASSERT_EQUAL(12, retangulos[0].largura);
+    TEST_ASSERT_EQUAL(0, retangulos[0].x);
+    TEST_ASSERT_EQUAL(0, retangulos[0].y);
+    TEST_ASSERT_EQUAL(10, retangulos[0].largura);
     TEST_ASSERT_EQUAL(5, retangulos[0].altura);
 }
 
 void test_criarDoisRetangulosDistintosAdicionaNoArrayENaoModificaORetanguloExistente(void) {
-    Retangulo *retangulo1 = criarRetangulo(1, 3, 12, 5);
-    Retangulo *retangulo2 = criarRetangulo(15, 3, 12, 5);
+    int retanguloIndex1 = criarRetangulo(0, 0, 10, 5);
+    int retanguloIndex2 = criarRetangulo(11, 0, 10, 5);
 
+    TEST_ASSERT_EQUAL(0, retanguloIndex1);
+    TEST_ASSERT_EQUAL(1, retanguloIndex2);
     TEST_ASSERT_EQUAL(2, contadorRetangulos);
 
-    TEST_ASSERT_EQUAL(1, retangulos[0].x);
-    TEST_ASSERT_EQUAL(1, retangulos[0].y);
-    TEST_ASSERT_EQUAL(12, retangulos[0].largura);
-    TEST_ASSERT_EQUAL(5, retangulos[0].altura);
+    TEST_ASSERT_EQUAL(0, retangulos[retanguloIndex1].x);
+    TEST_ASSERT_EQUAL(0, retangulos[retanguloIndex1].y);
+    TEST_ASSERT_EQUAL(10, retangulos[retanguloIndex1].largura);
+    TEST_ASSERT_EQUAL(5, retangulos[retanguloIndex1].altura);
 
-    TEST_ASSERT_EQUAL(15, retangulos[1].x);
-    TEST_ASSERT_EQUAL(1, retangulos[1].y);
-    TEST_ASSERT_EQUAL(12, retangulos[1].largura);
-    TEST_ASSERT_EQUAL(5, retangulos[1].altura);
+    TEST_ASSERT_EQUAL(11, retangulos[retanguloIndex2].x);
+    TEST_ASSERT_EQUAL(0, retangulos[retanguloIndex2].y);
+    TEST_ASSERT_EQUAL(10, retangulos[retanguloIndex2].largura);
+    TEST_ASSERT_EQUAL(5, retangulos[retanguloIndex2].altura);
+}
+
+void test_interseta(void) {
+    // Inicializar o array de retângulos sabendo antecipadamente que serão necessários 3 retângulos
+    contadorRetangulos = 0;
+    retangulos = malloc(sizeof(Retangulo) * 2);
+
+    // Adicionar um primeiro retângulo ao cenário, sendo o primeiro retângulo, obviamente, não intersecciona com nenhum outro
+    Retangulo retangulo1 = {0, 0, 10, 5};
+    TEST_ASSERT_FALSE(interseta(&retangulo1));
+    retangulos[contadorRetangulos++] = retangulo1; // Adicionar o retângulo ao array de retângulos
+
+    // Adicionar um segundo retangulo que nao intersecciona com o primeiro
+    Retangulo retangulo2 = {11, 0, 10, 5};
+    TEST_ASSERT_FALSE(interseta(&retangulo2));
+    retangulos[contadorRetangulos++] = retangulo2; // Adicionar o retângulo ao array de retângulos
+
+    // Tentar adicionar um terceiro retangulo que intersecciona com o primeiro
+    Retangulo retangulo3 = {5, 2, 10, 5};
+    TEST_ASSERT_TRUE(interseta(&retangulo3));
+}
+
+void test_interseta2(void) {
+    // Inicializar o array de retângulos sabendo antecipadamente que serão necessários 3 retângulos
+    contadorRetangulos = 0;
+    retangulos = malloc(sizeof(Retangulo) * 2);
+
+    // Adicionar um primeiro retângulo ao cenário, sendo o primeiro retângulo, obviamente, não intersecciona com nenhum outro
+    Retangulo retangulo1 = {1, 0, 1, 4};
+    TEST_ASSERT_FALSE(interseta(&retangulo1));
+    retangulos[contadorRetangulos++] = retangulo1; // Adicionar o retângulo ao array de retângulos
+
+    // Adicionar um segundo retangulo que nao intersecciona com o primeiro
+    Retangulo retangulo2 = {0, 2, 3, 2};
+    TEST_ASSERT_TRUE(interseta(&retangulo2));
+}
+
+void test_insersetaDevePermitirQueDoisRetangulosToquemSeusLados(void) {
+    // Inicializar o array de retângulos sabendo antecipadamente que serão necessários 3 retângulos
+    contadorRetangulos = 0;
+    retangulos = malloc(sizeof(Retangulo) * 2);
+
+    // Adicionar um primeiro retângulo ao cenário, sendo o primeiro retângulo, obviamente, não intersecciona com nenhum outro
+    Retangulo retangulo1 = {0, 0, 1, 4};
+    TEST_ASSERT_FALSE(interseta(&retangulo1));
+    retangulos[contadorRetangulos++] = retangulo1; // Adicionar o retângulo ao array de retângulos
+
+    // Adicionar um segundo retangulo que nao intersecciona com o primeiro
+    Retangulo retangulo2 = {1, 0, 3, 2};
+    TEST_ASSERT_FALSE(interseta(&retangulo2));
+    retangulos[contadorRetangulos++] = retangulo2; // Adicionar o retângulo ao array de retângulos
 }
 
 void test_criar3RetangulosSendoQueUmDelesInterseccionaComOsOutros(void) {
-    Retangulo *retangulo1 = criarRetangulo(1, 3, 12, 5);
-    Retangulo *retangulo2 = criarRetangulo(15, 3, 12, 5);
-    Retangulo *retangulo3 = criarRetangulo(10, 3, 12, 5); // Intersecciona com retangulo1
+    int retanguloIndex1 = criarRetangulo(1, 3, 12, 5);
+    int retanguloIndex2 = criarRetangulo(15, 3, 12, 5);
+    int retanguloIndex3 = criarRetangulo(2, 2, 20, 5); // Intersecciona com os dois primeiros
 
     TEST_ASSERT_EQUAL(2, contadorRetangulos);
 
-    TEST_ASSERT_EQUAL(1, retangulos[0].x);
-    TEST_ASSERT_EQUAL(1, retangulos[0].y);
-    TEST_ASSERT_EQUAL(12, retangulos[0].largura);
-    TEST_ASSERT_EQUAL(5, retangulos[0].altura);
+    TEST_ASSERT_EQUAL(1, retangulos[retanguloIndex1].x);
+    TEST_ASSERT_EQUAL(0, retangulos[retanguloIndex1].y);
+    TEST_ASSERT_EQUAL(12, retangulos[retanguloIndex1].largura);
+    TEST_ASSERT_EQUAL(5, retangulos[retanguloIndex1].altura);
 
-    TEST_ASSERT_EQUAL(15, retangulos[1].x);
-    TEST_ASSERT_EQUAL(1, retangulos[1].y);
-    TEST_ASSERT_EQUAL(12, retangulos[1].largura);
-    TEST_ASSERT_EQUAL(5, retangulos[1].altura);
+    TEST_ASSERT_EQUAL(15, retangulos[retanguloIndex2].x);
+    TEST_ASSERT_EQUAL(0, retangulos[retanguloIndex2].y);
+    TEST_ASSERT_EQUAL(12, retangulos[retanguloIndex2].largura);
+    TEST_ASSERT_EQUAL(5, retangulos[retanguloIndex2].altura);
 
-    TEST_ASSERT_NULL(retangulo3);
+    TEST_ASSERT_EQUAL(-1, retanguloIndex3);
 }
 
 void test_aplicarGravidadeAUmRetangulo(void) {
-    Retangulo *retangulo = criarRetangulo(1, 3, 12, 5);
+    int retanguloIndex = criarRetangulo(1, 3, 12, 5);
+    Retangulo retangulo = retangulos[retanguloIndex];
     aplicarGravidade(retangulo);
-    TEST_ASSERT_EQUAL(1, retangulo->x);
-    TEST_ASSERT_EQUAL(1, retangulo->y);
-    TEST_ASSERT_EQUAL(12, retangulo->largura);
-    TEST_ASSERT_EQUAL(5, retangulo->altura);
+    
+    TEST_ASSERT_EQUAL(1, retangulo.x);
+    TEST_ASSERT_EQUAL(0, retangulo.y);
+    TEST_ASSERT_EQUAL(12, retangulo.largura);
+    TEST_ASSERT_EQUAL(5, retangulo.altura);
 }
 
 void test_aplicarGravidadeADoisRetangulosLadoALado(void) {
-    Retangulo *retangulo1 = criarRetangulo(1, 3, 12, 5);
-    Retangulo *retangulo2 = criarRetangulo(15, 3, 12, 5);
+    int retanguloIndex1 = criarRetangulo(1, 3, 12, 5);
+    int retanguloIndex2 = criarRetangulo(15, 3, 12, 5);
+    
+    Retangulo retangulo1 = retangulos[retanguloIndex1];
+    Retangulo retangulo2 = retangulos[retanguloIndex2];
+    
     aplicarGravidade(retangulo1);
     aplicarGravidade(retangulo2);
-    TEST_ASSERT_EQUAL(1, retangulo1->x);
-    TEST_ASSERT_EQUAL(1, retangulo1->y);
-    TEST_ASSERT_EQUAL(12, retangulo1->largura);
-    TEST_ASSERT_EQUAL(5, retangulo1->altura);
-    TEST_ASSERT_EQUAL(15, retangulo2->x);
-    TEST_ASSERT_EQUAL(1, retangulo2->y);
-    TEST_ASSERT_EQUAL(12, retangulo2->largura);
-    TEST_ASSERT_EQUAL(5, retangulo2->altura);
+    TEST_ASSERT_EQUAL(1, retangulo1.x);
+    TEST_ASSERT_EQUAL(0, retangulo1.y);
+    TEST_ASSERT_EQUAL(12, retangulo1.largura);
+    TEST_ASSERT_EQUAL(5, retangulo1.altura);
+    TEST_ASSERT_EQUAL(15, retangulo2.x);
+    TEST_ASSERT_EQUAL(0, retangulo2.y);
+    TEST_ASSERT_EQUAL(12, retangulo2.largura);
+    TEST_ASSERT_EQUAL(5, retangulo2.altura);
 }
 
 void test_aplicarGravidadeADoisRetangulosUmSobreOOutroComMesmaLargura(void) {
-    Retangulo *retangulo1 = criarRetangulo(1, 3, 12, 5);
-    TEST_ASSERT_TRUE(retangulo1 == &retangulos[0]);
+    int retanguloIndex1 = criarRetangulo(1, 3, 12, 5);
+    TEST_ASSERT_EQUAL(0, retanguloIndex1);
+    Retangulo retangulo1 = retangulos[retanguloIndex1];
     aplicarGravidade(retangulo1);
-    Retangulo *retangulo2 = criarRetangulo(1, 8, 12, 5);
+    
+    int retanguloIndex2 = criarRetangulo(1, 8, 12, 5);
+    TEST_ASSERT_EQUAL(1, retanguloIndex2);
+    Retangulo retangulo2 = retangulos[retanguloIndex2];
+    
     aplicarGravidade(retangulo2);
-    TEST_ASSERT_EQUAL(1, retangulo1->x);
-    TEST_ASSERT_EQUAL(1, retangulo1->y);
-    TEST_ASSERT_EQUAL(12, retangulo1->largura);
-    TEST_ASSERT_EQUAL(5, retangulo1->altura);
-    TEST_ASSERT_EQUAL(1, retangulo2->x);
-    TEST_ASSERT_EQUAL(6, retangulo2->y);
-    TEST_ASSERT_EQUAL(12, retangulo2->largura);
-    TEST_ASSERT_EQUAL(5, retangulo2->altura);
+    TEST_ASSERT_EQUAL(1, retangulo1.x);
+    TEST_ASSERT_EQUAL(0, retangulo1.y);
+    TEST_ASSERT_EQUAL(12, retangulo1.largura);
+    TEST_ASSERT_EQUAL(5, retangulo1.altura);
+    TEST_ASSERT_EQUAL(1, retangulo2.x);
+    TEST_ASSERT_EQUAL(5, retangulo2.y);
+    TEST_ASSERT_EQUAL(12, retangulo2.largura);
+    TEST_ASSERT_EQUAL(5, retangulo2.altura);
 }
 
 void test_aplicarGravidadeATresRetangulosPrimeiroESegundoLadoALadoComAlturasDiferentesTerceiroNaoInterseccionaMasDeveCairSobreOMaisAlto() {
-    Retangulo *retangulo1 = criarRetangulo(1, 3, 12, 5);
-    Retangulo *retangulo2 = criarRetangulo(15, 10, 12, 7);
-    aplicarGravidade(retangulo1);
-    aplicarGravidade(retangulo2);
-    Retangulo *retangulo3 = criarRetangulo(10, 20, 12, 5);
-    aplicarGravidade(retangulo3);
-    TEST_ASSERT_EQUAL(1, retangulo1->x);
-    TEST_ASSERT_EQUAL(1, retangulo1->y);
-    TEST_ASSERT_EQUAL(12, retangulo1->largura);
-    TEST_ASSERT_EQUAL(5, retangulo1->altura);
-    TEST_ASSERT_EQUAL(15, retangulo2->x);
-    TEST_ASSERT_EQUAL(1, retangulo2->y);
-    TEST_ASSERT_EQUAL(12, retangulo2->largura);
-    TEST_ASSERT_EQUAL(7, retangulo2->altura);
-    TEST_ASSERT_EQUAL(10, retangulo3->x);
-    TEST_ASSERT_EQUAL(8, retangulo3->y);
-    TEST_ASSERT_EQUAL(12, retangulo3->largura);
-    TEST_ASSERT_EQUAL(5, retangulo3->altura);
+    criarRetangulo(0, 0, 2, 2);
+    criarRetangulo(2, 0, 2, 4);
+    criarRetangulo(0, 10, 6, 5);
+    Retangulo retangulo1 = retangulos[0];
+    Retangulo retangulo2 = retangulos[1];
+    Retangulo retangulo3 = retangulos[2];
+
+    TEST_ASSERT_EQUAL(3, contadorRetangulos);
+
+    TEST_ASSERT_EQUAL(0, retangulo1.x);
+    TEST_ASSERT_EQUAL(0, retangulo1.y);
+    TEST_ASSERT_EQUAL(2, retangulo1.largura);
+    TEST_ASSERT_EQUAL(2, retangulo1.altura);
+
+    TEST_ASSERT_EQUAL(2, retangulo2.x);
+    TEST_ASSERT_EQUAL(0, retangulo2.y);
+    TEST_ASSERT_EQUAL(2, retangulo2.largura);
+    TEST_ASSERT_EQUAL(4, retangulo2.altura);
+
+    TEST_ASSERT_EQUAL(0, retangulo3.x);
+    TEST_ASSERT_EQUAL(4, retangulo3.y);
+    TEST_ASSERT_EQUAL(6, retangulo3.largura);
+    TEST_ASSERT_EQUAL(5, retangulo3.altura);
 }
 
-// teste para criar 3 retangulos, aplicar gravidade e imprimir no ecra o cenarios
+// teste para criar 3 retangulos, e inspecionar o cenário visualmente
 void test_criar3RetangulosComDiferentesAlturasEscreverNoEcraParaConsultaDoCenario(void) {
-    Retangulo *retangulo1 = criarRetangulo(1, 3, 12, 5);
-    Retangulo *retangulo2 = criarRetangulo(15, 10, 12, 7);
-    aplicarGravidade(retangulo1);
-    aplicarGravidade(retangulo2);
-    Retangulo *retangulo3 = criarRetangulo(10, 20, 12, 5);
-    aplicarGravidade(retangulo3);
+    criarRetangulo(0, 0, 2, 2);
+    criarRetangulo(2, 0, 2, 4);
+    criarRetangulo(0, 10, 6, 5);
     imprimirCenario(retangulos, contadorRetangulos);
 }
 
 void test_criarGravidadeEAplicadaNaCriacaoDeTodosRetangulos(void) {
-    Retangulo *retangulo1 = criarRetangulo(1, 3, 12, 5);
-    Retangulo *retangulo2 = criarRetangulo(15, 10, 12, 7);
-    Retangulo *retangulo3 = criarRetangulo(10, 20, 12, 5);
+    criarRetangulo(1, 3, 12, 5);
+    criarRetangulo(15, 10, 12, 7);
+    criarRetangulo(10, 20, 12, 5);
+
+    Retangulo retangulo1 = retangulos[0];
+    Retangulo retangulo2 = retangulos[1];
+    Retangulo retangulo3 = retangulos[2];
     TEST_ASSERT_EQUAL(3, contadorRetangulos);
 
     // verificar que todos os retangulos foram movidos para a posicao correta
-    TEST_ASSERT_EQUAL(1, retangulo1->x);
-    TEST_ASSERT_EQUAL(1, retangulo1->y);
-    TEST_ASSERT_EQUAL(12, retangulo1->largura);
-    TEST_ASSERT_EQUAL(5, retangulo1->altura);
+    TEST_ASSERT_EQUAL(1, retangulo1.x);
+    TEST_ASSERT_EQUAL(0, retangulo1.y);
+    TEST_ASSERT_EQUAL(12, retangulo1.largura);
+    TEST_ASSERT_EQUAL(5, retangulo1.altura);
 
-    TEST_ASSERT_EQUAL(15, retangulo2->x);
-    TEST_ASSERT_EQUAL(1, retangulo2->y);
-    TEST_ASSERT_EQUAL(12, retangulo2->largura);
-    TEST_ASSERT_EQUAL(7, retangulo2->altura);
+    TEST_ASSERT_EQUAL(15, retangulo2.x);
+    TEST_ASSERT_EQUAL(0, retangulo2.y);
+    TEST_ASSERT_EQUAL(12, retangulo2.largura);
+    TEST_ASSERT_EQUAL(7, retangulo2.altura);
 
-    TEST_ASSERT_EQUAL(10, retangulo3->x);
-    TEST_ASSERT_EQUAL(8, retangulo3->y);
-    TEST_ASSERT_EQUAL(12, retangulo3->largura);
-    TEST_ASSERT_EQUAL(5, retangulo3->altura);
+    TEST_ASSERT_EQUAL(10, retangulo3.x);
+    TEST_ASSERT_EQUAL(7, retangulo3.y);
+    TEST_ASSERT_EQUAL(12, retangulo3.largura);
+    TEST_ASSERT_EQUAL(5, retangulo3.altura);
 }
 
 void test_moverUmRetanguloParaADireitaMoveORetangulo(void) {
-    Retangulo *retangulo = criarRetangulo(1, 3, 12, 5);
-    // apesar do retangulo ser criado em y = 3, a gravidade faz com que ele caia para y = 1
-    moverDireita(1, 1, 5);
+    Retangulo *retangulo = &retangulos[criarRetangulo(1, 3, 12, 5)];
+    // apesar do retangulo ser criado em y = 3, a gravidade faz com que ele caia para y = 0
+    TEST_ASSERT_TRUE(moverDireita(1, 1, 5));
+
     TEST_ASSERT_EQUAL(6, retangulo->x);
-    TEST_ASSERT_EQUAL(1, retangulo->y);
+    TEST_ASSERT_EQUAL(0, retangulo->y);
     TEST_ASSERT_EQUAL(12, retangulo->largura);
     TEST_ASSERT_EQUAL(5, retangulo->altura);
 }
 
 void test_moverUmRetanguloQueEstaSobreOutroFazComQueEsteCaiaAposUltrapassarLarguraDoRetanguloDeBaixo(void) {
-    Retangulo *retangulo1 = criarRetangulo(1, 3, 5, 5);
-    Retangulo *retangulo2 = criarRetangulo(1, 8, 12, 5);
+    criarRetangulo(0, 0, 10, 5);
+    criarRetangulo(6, 10, 3, 3);
+    Retangulo *retangulo1 = &retangulos[0];
+    Retangulo *retangulo2 = &retangulos[1];
 
-    // move o retangulo2 para a direita
-    moverDireita(1, 6, 5);
+//    imprimirCenario(retangulos, contadorRetangulos);
 
-    TEST_ASSERT_EQUAL(1, retangulo1->x);
-    TEST_ASSERT_EQUAL(1, retangulo1->y);
-    TEST_ASSERT_EQUAL(5, retangulo1->largura);
+    // mover retangulo2 para a direita
+    TEST_ASSERT_TRUE(moverDireita(6, 6, 5));
+
+    TEST_ASSERT_EQUAL(0, retangulo1->x);
+    TEST_ASSERT_EQUAL(0, retangulo1->y);
+    TEST_ASSERT_EQUAL(10, retangulo1->largura);
     TEST_ASSERT_EQUAL(5, retangulo1->altura);
 
-    TEST_ASSERT_EQUAL(6, retangulo2->x);
-    TEST_ASSERT_EQUAL(1, retangulo2->y);
-    TEST_ASSERT_EQUAL(12, retangulo2->largura);
-    TEST_ASSERT_EQUAL(5, retangulo2->altura);
+    TEST_ASSERT_EQUAL(11, retangulo2->x);
+    TEST_ASSERT_EQUAL(0, retangulo2->y);
+    TEST_ASSERT_EQUAL(3, retangulo2->largura);
+    TEST_ASSERT_EQUAL(3, retangulo2->altura);
+
+//    imprimirCenario(retangulos, contadorRetangulos);
 }
 
 void test_moverUmRetanguloParaADireitaNaoPermiteInterseccaoComOutroRetangulo(void) {
-    Retangulo *retangulo1 = criarRetangulo(1, 3, 5, 5);
-    Retangulo *retangulo2 = criarRetangulo(6, 3, 5, 5);
+    criarRetangulo(1, 3, 5, 5);
+    criarRetangulo(6, 3, 5, 5);
+    Retangulo *retangulo1 = &retangulos[0];
+    Retangulo *retangulo2 = &retangulos[1];
 
     moverDireita(1, 1, 5);
 
     TEST_ASSERT_EQUAL(1, retangulo1->x);
-    TEST_ASSERT_EQUAL(1, retangulo1->y);
+    TEST_ASSERT_EQUAL(0, retangulo1->y);
     TEST_ASSERT_EQUAL(5, retangulo1->largura);
     TEST_ASSERT_EQUAL(5, retangulo1->altura);
 
     TEST_ASSERT_EQUAL(6, retangulo2->x);
-    TEST_ASSERT_EQUAL(1, retangulo2->y);
+    TEST_ASSERT_EQUAL(0, retangulo2->y);
     TEST_ASSERT_EQUAL(5, retangulo2->largura);
     TEST_ASSERT_EQUAL(5, retangulo2->altura);
 }
 
 void test_moverUmRetanguloParaAEsquerdaMoveORetangulo(void) {
-    Retangulo *retangulo = criarRetangulo(6, 3, 12, 5);
+    Retangulo *retangulo = &retangulos[criarRetangulo(6, 3, 12, 5)];
     // apesar do retangulo ser criado em y = 3, a gravidade faz com que ele caia para y = 1
     moverEsquerda(6, 1, 5);
     TEST_ASSERT_EQUAL(1, retangulo->x);
-    TEST_ASSERT_EQUAL(1, retangulo->y);
+    TEST_ASSERT_EQUAL(0, retangulo->y);
     TEST_ASSERT_EQUAL(12, retangulo->largura);
     TEST_ASSERT_EQUAL(5, retangulo->altura);
 }
 
 void test_moverParaEsquerdaUmRetanguloQueEstaSobreOutroFazComQueEsteCaiaAposUltrapassarLarguraDoRetanguloDeBaixo(void) {
-    Retangulo *retangulo1 = criarRetangulo(6, 3, 5, 5);
-    Retangulo *retangulo2 = criarRetangulo(6, 8, 3, 3);
+    criarRetangulo(6, 3, 5, 5);
+    criarRetangulo(6, 8, 3, 3);
+
+    Retangulo *retangulo1 = &retangulos[0];
+    Retangulo *retangulo2 = &retangulos[1];
 
     // mover retangulo2 para a esquerda
     moverEsquerda(6, 6, 3);
 
     TEST_ASSERT_EQUAL(6, retangulo1->x);
-    TEST_ASSERT_EQUAL(1, retangulo1->y);
+    TEST_ASSERT_EQUAL(0, retangulo1->y);
     TEST_ASSERT_EQUAL(5, retangulo1->largura);
     TEST_ASSERT_EQUAL(5, retangulo1->altura);
 
     TEST_ASSERT_EQUAL(3, retangulo2->x);
-    TEST_ASSERT_EQUAL(1, retangulo2->y);
+    TEST_ASSERT_EQUAL(0, retangulo2->y);
     TEST_ASSERT_EQUAL(3, retangulo2->largura);
     TEST_ASSERT_EQUAL(3, retangulo2->altura);
 }
 
 void test_moverUmRetanguloParaADireitaAteOLimiteEVerificarQueNaoUltrapassa(void) {
-    Retangulo *retangulo = criarRetangulo(75, 3, 5, 5);
-    moverDireita(75, 1, 5);
+    Retangulo *retangulo = &retangulos[criarRetangulo(75, 3, 5, 5)];
+    moverDireita(75, 1, 10);
     TEST_ASSERT_EQUAL(75, retangulo->x);
-    TEST_ASSERT_EQUAL(1, retangulo->y);
+    TEST_ASSERT_EQUAL(0, retangulo->y);
     TEST_ASSERT_EQUAL(5, retangulo->largura);
     TEST_ASSERT_EQUAL(5, retangulo->altura);
 }
@@ -264,60 +329,48 @@ void test_moverUmRetanguloParaADireitaAteOLimiteEVerificarQueNaoUltrapassa(void)
 //  moveleft x,y+p - desloca o retângulo que contém o ponto (x,y) para a esquerda p posições
 void test_executarComando(void) {
     executarComando("create 1,3+12,5");
-    TEST_ASSERT_EQUAL(1, contadorRetangulos);
-    TEST_ASSERT_EQUAL(1, retangulos[0].x);
-    TEST_ASSERT_EQUAL(1, retangulos[0].y);
-    TEST_ASSERT_EQUAL(12, retangulos[0].largura);
-    TEST_ASSERT_EQUAL(5, retangulos[0].altura);
+    executarComando("create 9,6+11,3");
+    executarComando("create 18,10+6,3");
+    executarComando("moveleft 12,7+3");
 
-    executarComando("moveright 1,1+5");
-    TEST_ASSERT_EQUAL(6, retangulos[0].x);
-    TEST_ASSERT_EQUAL(1, retangulos[0].y);
-    TEST_ASSERT_EQUAL(12, retangulos[0].largura);
-    TEST_ASSERT_EQUAL(5, retangulos[0].altura);
+    // testar comandos invalidos
+    executarComando("create 1,3+12,5+5"); // comando invalido
+    executarComando("create 1,3+12,5+"); // comando invalido
+    executarComando("create 1,3+12,5+5+5"); // comando invalido
+    executarComando("create 1,3+12,5+5,5"); // comando invalido
+    executarComando("create 1,3+12,5+5,5+5"); // comando invalido
+    executarComando("create 1,3+12,5+5,5+"); // comando invalido
+    executarComando("create 1,3+12,5+5,5+5,5"); // comando invalido
+    executarComando("create 1,3+12,5+5,5+5,5+5"); // comando invalido
 
-    executarComando("moveleft 6,1+5");
-    TEST_ASSERT_EQUAL(1, retangulos[0].x);
-    TEST_ASSERT_EQUAL(1, retangulos[0].y);
-    TEST_ASSERT_EQUAL(12, retangulos[0].largura);
-    TEST_ASSERT_EQUAL(5, retangulos[0].altura);
-
-    executarComando("create 15,3+12,5");
-    TEST_ASSERT_EQUAL(2, contadorRetangulos);
-    TEST_ASSERT_EQUAL(15, retangulos[1].x);
-    TEST_ASSERT_EQUAL(1, retangulos[1].y);
-    TEST_ASSERT_EQUAL(12, retangulos[1].largura);
-    TEST_ASSERT_EQUAL(5, retangulos[1].altura);
-
-    executarComando("moveright 15,1+5");
-    TEST_ASSERT_EQUAL(20, retangulos[1].x);
-    TEST_ASSERT_EQUAL(1, retangulos[1].y);
-    TEST_ASSERT_EQUAL(12, retangulos[1].largura);
-    TEST_ASSERT_EQUAL(5, retangulos[1].altura);
-
-    executarComando("moveleft 20,1+5");
-    TEST_ASSERT_EQUAL(15, retangulos[1].x);
-    TEST_ASSERT_EQUAL(1, retangulos[1].y);
-    TEST_ASSERT_EQUAL(12, retangulos[1].largura);
-    TEST_ASSERT_EQUAL(5, retangulos[1].altura);
-
-    executarComando("create 26,8+12,5");
     TEST_ASSERT_EQUAL(3, contadorRetangulos);
-    TEST_ASSERT_EQUAL(26, retangulos[2].x);
-    TEST_ASSERT_EQUAL(6, retangulos[2].y);
-    TEST_ASSERT_EQUAL(12, retangulos[2].largura);
 
-    executarComando("moveright 26,6+5");
-    TEST_ASSERT_EQUAL(31, retangulos[2].x);
-    TEST_ASSERT_EQUAL(1, retangulos[2].y);
-    TEST_ASSERT_EQUAL(12, retangulos[2].largura);
-    TEST_ASSERT_EQUAL(5, retangulos[2].altura);
+    TEST_ASSERT_EQUAL(0, retangulos[0].x);
+    TEST_ASSERT_EQUAL(0, retangulos[0].y);
+    TEST_ASSERT_EQUAL(12, retangulos[0].largura);
+    TEST_ASSERT_EQUAL(5, retangulos[0].altura);
 
-    executarComando("moveleft 31,1+5");
-    TEST_ASSERT_EQUAL(31, retangulos[2].x);
-    TEST_ASSERT_EQUAL(1, retangulos[2].y);
-    TEST_ASSERT_EQUAL(12, retangulos[2].largura);
-    TEST_ASSERT_EQUAL(5, retangulos[2].altura);
+    TEST_ASSERT_EQUAL(5, retangulos[1].x);
+    TEST_ASSERT_EQUAL(5, retangulos[1].y);
+    TEST_ASSERT_EQUAL(11, retangulos[1].largura);
+    TEST_ASSERT_EQUAL(3, retangulos[1].altura);
+
+    TEST_ASSERT_EQUAL(17, retangulos[2].x);
+    TEST_ASSERT_EQUAL(0, retangulos[2].y);
+    TEST_ASSERT_EQUAL(6, retangulos[2].largura);
+    TEST_ASSERT_EQUAL(3, retangulos[2].altura);
+}
+
+// Commandos propostos
+//  create 1,3+12,5
+//  create 9,6+11,3
+//  create 18,10+6,3
+//  moveleft 12,7+3
+void test_imprimirComandosPropostosEVisualizarResultado(void) {
+    executarComando("create 1,3+12,5");
+    executarComando("create 9,6+11,3");
+    executarComando("create 18,10+6,3");
+    executarComando("moveleft 12,7+3");
 }
 
 int main(void) {
@@ -327,6 +380,7 @@ int main(void) {
     RUN_TEST(test_criarDoisRetangulosDistintosAdicionaNoArrayENaoModificaORetanguloExistente);
     RUN_TEST(test_criar3RetangulosSendoQueUmDelesInterseccionaComOsOutros);
     RUN_TEST(test_interseta);
+    RUN_TEST(test_interseta2);
     RUN_TEST(test_insersetaDevePermitirQueDoisRetangulosToquemSeusLados);
     RUN_TEST(test_aplicarGravidadeAUmRetangulo);
     RUN_TEST(test_aplicarGravidadeADoisRetangulosLadoALado);
@@ -340,8 +394,8 @@ int main(void) {
     RUN_TEST(test_moverParaEsquerdaUmRetanguloQueEstaSobreOutroFazComQueEsteCaiaAposUltrapassarLarguraDoRetanguloDeBaixo);
     RUN_TEST(test_moverUmRetanguloParaADireitaAteOLimiteEVerificarQueNaoUltrapassa);
     RUN_TEST(test_executarComando);
-
-    // RUN_TEST(test_criar3RetangulosComDiferentesAlturasEscreverNoEcraParaConsultaDoCenario);
+    RUN_TEST(test_imprimirComandosPropostosEVisualizarResultado);
+    RUN_TEST(test_criar3RetangulosComDiferentesAlturasEscreverNoEcraParaConsultaDoCenario);
     return UNITY_END();
 }
 
