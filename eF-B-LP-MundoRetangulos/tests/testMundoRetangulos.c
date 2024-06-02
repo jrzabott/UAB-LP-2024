@@ -345,17 +345,17 @@ void test_executarComando(void) {
 
     TEST_ASSERT_EQUAL(3, contadorRetangulos);
 
-    TEST_ASSERT_EQUAL(0, retangulos[0].x);
+    TEST_ASSERT_EQUAL(1, retangulos[0].x);
     TEST_ASSERT_EQUAL(0, retangulos[0].y);
     TEST_ASSERT_EQUAL(12, retangulos[0].largura);
     TEST_ASSERT_EQUAL(5, retangulos[0].altura);
 
-    TEST_ASSERT_EQUAL(5, retangulos[1].x);
+    TEST_ASSERT_EQUAL(6, retangulos[1].x);
     TEST_ASSERT_EQUAL(5, retangulos[1].y);
     TEST_ASSERT_EQUAL(11, retangulos[1].largura);
     TEST_ASSERT_EQUAL(3, retangulos[1].altura);
 
-    TEST_ASSERT_EQUAL(17, retangulos[2].x);
+    TEST_ASSERT_EQUAL(18, retangulos[2].x);
     TEST_ASSERT_EQUAL(0, retangulos[2].y);
     TEST_ASSERT_EQUAL(6, retangulos[2].largura);
     TEST_ASSERT_EQUAL(3, retangulos[2].altura);
@@ -373,6 +373,42 @@ void test_imprimirComandosPropostosEVisualizarResultado(void) {
     executarComando("moveleft 12,7+3");
 }
 
+void test_mergePossivel(void) {
+    Retangulo ret1 = {1, 1, 5, 5};
+    Retangulo ret2 = {1, 6, 5, 5};
+    Retangulo ret3 = {2, 2, 5, 5};
+    Retangulo ret4 = {1, 1, 6, 5};
+
+    TEST_ASSERT_TRUE(mergePossivel(&ret1, &ret2));
+    TEST_ASSERT_FALSE(mergePossivel(&ret1, &ret3));
+    TEST_ASSERT_FALSE(mergePossivel(&ret1, &ret4));
+}
+
+void test_mergeRetangulos(void) {
+    criarRetangulo(1, 0, 5, 5);
+    criarRetangulo(1, 5, 5, 5);
+
+    TEST_ASSERT_EQUAL(2, contadorRetangulos);
+
+    mergeRetangulos(0, 1);
+
+    TEST_ASSERT_EQUAL(1, contadorRetangulos);
+
+    TEST_ASSERT_EQUAL(1, retangulos[0].x);
+    TEST_ASSERT_EQUAL(0, retangulos[0].y);
+    TEST_ASSERT_EQUAL(5, retangulos[0].largura);
+    TEST_ASSERT_EQUAL(10, retangulos[0].altura);
+}
+
+void test_alertaSobreposicao(void) {
+    criarRetangulo(1, 1, 5, 5);
+    criarRetangulo(1, 6, 5, 5);
+    criarRetangulo(2, 2, 5, 5);
+
+    alertaSobreposicao(); // Deve alertar que os dois primeiros retângulos podem ser unidos - verificar no output
+}
+
+#ifdef RUN_TESTS
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_criarRetanguloForaLimites);
@@ -395,7 +431,14 @@ int main(void) {
     RUN_TEST(test_moverUmRetanguloParaADireitaAteOLimiteEVerificarQueNaoUltrapassa);
     RUN_TEST(test_executarComando);
     RUN_TEST(test_imprimirComandosPropostosEVisualizarResultado);
+    RUN_TEST(test_mergePossivel);
+    RUN_TEST(test_mergeRetangulos);
+
+    // Tests sem asserts, apenas para verificar o output
     RUN_TEST(test_criar3RetangulosComDiferentesAlturasEscreverNoEcraParaConsultaDoCenario);
+    RUN_TEST(test_alertaSobreposicao);
+
     return UNITY_END();
 }
+#endif
 

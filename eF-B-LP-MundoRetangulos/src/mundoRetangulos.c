@@ -6,12 +6,6 @@
 Retangulo *retangulos;
 int contadorRetangulos = 0;
 
-int checarSobreposicao(Retangulo *novoRetangulo, Retangulo *retangulo);
-int intersetaExceto(Retangulo *retangulo, int indexAIgnorar);
-void aplicarGravidadeEmTodos();
-Retangulo aplicarGravidadeIgnorarIntersecaoCom(Retangulo retangulo, int indexAIgnorar);
-
-
 // Este metodo faz 3 coisas:
 // 1. Cria um novo retangulo
 // 2. Realoca o array de retangulos para acomodar o novo retangulo e incrementa o contador de retangulos
@@ -59,6 +53,9 @@ int criarRetangulo(int x, int y, int largura, int altura) {
         return -1;
     }
 
+    // exibe a informar que o retangulo foi criado com sucesso, a posicao atual, e o numero de retangulos existentes
+    printf("Retângulo criado com sucesso em (%d, %d) com largura %d e altura %d\n", novoRetangulo.x, novoRetangulo.y, novoRetangulo.largura, novoRetangulo.altura);
+
     // Adicionar o novo retângulo ao array de retângulos
     retangulos[contadorRetangulos] = novoRetangulo;
 
@@ -84,6 +81,10 @@ Retangulo aplicarGravidade(Retangulo retangulo) {
             novoRetangulo.y++;
             break;
         }
+    }
+    // exibe a informar se houve alguma alteracao de posicao do retangulo
+    if (novoRetangulo.y != retangulo.y) {
+        printf("Gravidade Aplicada. Retângulo movido de (%d, %d) para (%d, %d)\n", retangulo.x, retangulo.y, novoRetangulo.x, novoRetangulo.y);
     }
     return novoRetangulo;
 }
@@ -212,6 +213,7 @@ int moverDireita(int x, int y, int p) {
             if (!intersetaExceto(&novoRetangulo, i)) {
                 retangulos[i] = aplicarGravidade(novoRetangulo);
                 aplicarGravidadeEmTodos();
+                // mensagem de sucesso a informar ao utilizador que o retangulo foi movido com sucesso
                 return 1;
             }
         }
@@ -290,6 +292,10 @@ Retangulo aplicarGravidadeIgnorarIntersecaoCom(Retangulo retangulo, int indexAIg
                 break;
             }
         }
+        // exibe a informar se houve alguma alteracao de posicao do retangulo
+        if (novoRetangulo.y != retangulo.y) {
+            printf("Gravidade Aplicada. Retângulo movido de (%d, %d) para (%d, %d)\n", retangulo.x, retangulo.y, novoRetangulo.x, novoRetangulo.y);
+        }
         return novoRetangulo;
 }
 
@@ -309,17 +315,15 @@ void executarComando(char* comando) {
     // o quarto numero e sempre um numero inteiro e separado por virgula do terceiro
     // os numeros devem ser positivos
     // os numeros devem estar dentro dos limites do mundo de retangulos
-
-    // um ponto de atencao, como estamos a trabalhar com arrays com indices zero, todas as vezes que o
-    // usuario informar um ponto, devemos subtrair 1 do valor informado, para que o ponto seja valido no array
-    // e essa subtracao seja invisivel ao usuario
     int x, y, largura, altura, p;
+    int x1, y1, x2, y2;
+
     if (sscanf(comando, "create %d,%d+%d,%d", &x, &y, &largura, &altura) == 4) {
         if (x < 0 || y < 0 || largura <= 0 || altura <= 0 || x + largura > MAX_X || y + altura > MAX_Y) {
             printf("Comando inválido\n");
             return;
         }
-        if (criarRetangulo(x - 1, y - 1, largura, altura) == -1) {
+        if (criarRetangulo(x, y, largura, altura) == -1) {
             printf("Erro ao criar retângulo\n");
             return;
         } else {
@@ -330,7 +334,7 @@ void executarComando(char* comando) {
             printf("Comando inválido\n");
             return;
         }
-        if (!moverDireita(x - 1, y - 1, p)) {
+        if (!moverDireita(x, y, p)) {
             printf("Erro ao mover retângulo para a direita\n");
             return;
         } else {
@@ -341,17 +345,103 @@ void executarComando(char* comando) {
             printf("Comando inválido\n");
             return;
         }
-        if (!moverEsquerda(x - 1, y - 1, p)) {
+        if (!moverEsquerda(x, y, p)) {
             printf("Erro ao mover retângulo para a esquerda\n");
             return;
         } else {
             imprimirCenario(retangulos, contadorRetangulos);
         }
+    } else if (sscanf(comando, "merge %d,%d+%d,%d", &x1, &y1, &x2, &y2) == 4) {
+        if (x1 < 0 || y1 < 0 || x2 < 0 || y2 < 0 || x1 >= MAX_X || y1 >= MAX_Y || x2 >= MAX_X || y2 >= MAX_Y) {
+            printf("Comando inválido\n");
+            return;
+        }
+
+        int index1 = -1, index2 = -1;
+        for (int i = 0; i < contadorRetangulos; i++) {
+            if (retangulos[i].x == x1 && retangulos[i].y == y1) {
+                index1 = i;
+            }
+            if (retangulos[i].x == x2 && retangulos[i].y == y2) {
+                index2 = i;
+            }
+        }
+
+        if (index1 == -1 || index2 == -1) {
+            printf("Retângulos não encontrados\n");
+            return;
+        }
+
+        mergeRetangulos(index1, index2);
+        imprimirCenario(retangulos, contadorRetangulos);
     } else {
         printf("Comando inválido\n");
         return;
     }
+
+    // Após a execução de cada comando, verificar sobreposições
+    alertaSobreposicao();
 }
+    int mergePossivel(Retangulo *ret1, Retangulo *ret2) {
+        return (
+                ret1->x == ret2->x // estao na mesma coluna
+                && ret1->largura == ret2->largura // tem a mesma largura
+                && ret2->y == ret1->y + ret1->altura // ret2 esta imediatamente acima de ret1
+        );
 
+    }
 
+    void mergeRetangulos(int index1, int index2) {
+        if (index1 < 0 || index1 >= contadorRetangulos || index2 < 0 || index2 >= contadorRetangulos) {
+            printf("Índices inválidos para mesclagem\n");
+            return;
+        }
+        Retangulo *ret1 = &retangulos[index1];
+        Retangulo *ret2 = &retangulos[index2];
 
+        if (!mergePossivel(ret1, ret2)) {
+            printf("Os retângulos não são elegíveis para mesclagem\n");
+            return;
+        }
+
+        // Atualiza ret1 para a mesclagem
+        ret1->altura = ret1->altura + ret2->altura;
+
+        // Remove ret2 do array
+        for (int i = index2; i < contadorRetangulos - 1; i++) {
+            retangulos[i] = retangulos[i + 1];
+        }
+        contadorRetangulos--;
+        retangulos = realloc(retangulos, sizeof(Retangulo) * contadorRetangulos);
+    }
+
+    void alertaSobreposicao() {
+        for (int i = 0; i < contadorRetangulos; i++) {
+            for (int j = i + 1; j < contadorRetangulos; j++) {
+                if (mergePossivel(&retangulos[i], &retangulos[j])) {
+                    printf("Os retângulos em (%d, %d) e (%d, %d) podem ser unidos.\n",
+                           retangulos[i].x, retangulos[i].y, retangulos[j].x, retangulos[j].y);
+                }
+            }
+        }
+    }
+
+    // metodo main deve ser um loop que ira sair apenas quando o usuario informar a palavra exit,
+    // do contrario delegamos o conteudo para o metodo executarComando
+    #ifndef RUN_TESTS // required for unit testing
+    int main() {
+        char comando[100];
+        inicializarRetangulos();
+        while (1) {
+            printf("Digite um comando (create x,y+largura,altura | moveright x,y+p | moveleft x,y+p | merge x1,y1+x2,y2 | exit): ");
+            fgets(comando, 100, stdin);
+            comando[strcspn(comando, "\n")] = 0;
+            if (strcmp(comando, "exit") == 0) {
+                break;
+            }
+            executarComando(comando);
+        }
+        limparRetangulos();
+        return 0;
+    }
+    #endif

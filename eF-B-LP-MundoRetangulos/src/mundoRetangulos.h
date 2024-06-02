@@ -40,4 +40,25 @@ void inicializarRetangulos();
 // Função para limpar o array de retângulos
 void limparRetangulos();
 
+// Função para verificar se dois retângulos se sobrepõem.
+int checarSobreposicao(Retangulo *novoRetangulo, Retangulo *retangulo);
+
+// Verifica se um retângulo se sobrepõe a qualquer outro, exceto o retângulo no índice especificado.
+int intersetaExceto(Retangulo *retangulo, int indexAIgnorar);
+
+// Aplica a gravidade a todos os retângulos no array.
+void aplicarGravidadeEmTodos();
+
+// Aplica a gravidade a um retângulo, ignorando a interseção com o retângulo no índice especificado.
+Retangulo aplicarGravidadeIgnorarIntersecaoCom(Retangulo retangulo, int indexAIgnorar);
+
+// Verifica se é possível unir dois retângulos com base em suas posições e dimensões.
+int mergePossivel(Retangulo *ret1, Retangulo *ret2);
+
+// Une dois retângulos no array de retângulos, se possível, e remove o segundo retângulo.
+void mergeRetangulos(int index1, int index2);
+
+// Verifica se há retângulos que podem ser unidos e imprime um alerta.
+void alertaSobreposicao();
+
 #endif //UAB_LP_2024_MUNDORETANGULOS_H
