@@ -12,9 +12,12 @@ include_directories(
 
 # Ficheiros de código fonte.
 add_executable(
-        teste_semaforo      # Nome do executável
+        teste_sensor      # Nome do executável
         src/main.c          # Arquivo principal
         src/TipoVeiculo.c
+        src/TipoVeiculo.h
+        src/RegistoSensor.c
+        src/RegistoSensor.h
 )
 
 # Specify where the executable should be built.

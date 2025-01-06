@@ -19,6 +19,6 @@ typedef enum {
 
 char getTipoVeiculo(TipoVeiculo tipoVeiculo);
 TipoVeiculo getTipoVeiculoByChar(char tipoVeiculoChar);
-char* toString(TipoVeiculo tipoVeiculo);
+char* TipoVeiculoToString(TipoVeiculo tipoVeiculo);
 
 #endif //TIPOVEICULO_H
