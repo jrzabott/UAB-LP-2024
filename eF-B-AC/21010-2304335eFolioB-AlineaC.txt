@@ -1,0 +1,110 @@
+; Conversão de código facial completo (TF e TTF) para string ASCII armazenada em memória
+; R1: Código de entrada (00h a 0Fh)
+; R2: Endereço de memória para armazenar a string
+; FLAGS: Nenhuma necessária
+
+; ======================================
+; Strings em ASCII - Organizadas com Blocos Fixos de 20 Endereços
+
+                ORIG    8000h
+STRING_BOCA_GRANDE     STR     'B', 'o', 'c', 'a', ' ', 'g', 'r', 'a', 'n', 'd', 'e', 0h
+
+                ORIG    8014h
+STRING_BOCA_PEQUENA    STR     'B', 'o', 'c', 'a', ' ', 'p', 'e', 'q', 'u', 'e', 'n', 'a', 0h
+
+                ORIG    8028h
+STRING_BOCA_ABERTA     STR     'B', 'o', 'c', 'a', ' ', 'a', 'b', 'e', 'r', 't', 'a', 0h
+
+                ORIG    803Ch
+STRING_BOCA_FECHADA    STR     'B', 'o', 'c', 'a', ' ', 'f', 'e', 'c', 'h', 'a', 'd', 'a', 0h
+
+                ORIG    8050h
+STRING_NARIZ_CURTO     STR     'N', 'a', 'r', 'i', 'z', ' ', 'c', 'u', 'r', 't', 'o', 0h
+
+                ORIG    8064h
+STRING_NARIZ_COMPRIDO  STR     'N', 'a', 'r', 'i', 'z', ' ', 'c', 'o', 'm', 'p', 'r', 'i', 'd', 'o', 0h
+
+                ORIG    8078h
+STRING_NARIZ_ESTREITO  STR     'N', 'a', 'r', 'i', 'z', ' ', 'e', 's', 't', 'r', 'e', 'i', 't', 'o', 0h
+
+                ORIG    808Ch
+STRING_NARIZ_LARGO     STR     'N', 'a', 'r', 'i', 'z', ' ', 'l', 'a', 'r', 'g', 'o', 0h
+
+                ORIG    80A0h
+STRING_OLHOS_CASTANHOS STR     'O', 'l', 'h', 'o', 's', ' ', 'c', 'a', 's', 't', 'a', 'n', 'h', 'o', 's', 0h
+
+                ORIG    80B4h
+STRING_OLHOS_VERDES    STR     'O', 'l', 'h', 'o', 's', ' ', 'v', 'e', 'r', 'd', 'e', 's', 0h
+
+                ORIG    80C8h
+STRING_OLHOS_AZUIS     STR     'O', 'l', 'h', 'o', 's', ' ', 'a', 'z', 'u', 'i', 's', 0h
+
+                ORIG    80DCh
+STRING_OLHOS_CINZENTOS STR     'O', 'l', 'h', 'o', 's', ' ', 'c', 'i', 'n', 'z', 'e', 'n', 't', 'o', 's', 0h
+
+                ORIG    80F0h
+STRING_INVALIDO        STR     'I', 'n', 'v', 'a', 'l', 'i', 'd', 'o', 0h
+
+; ======================================
+; Código Principal
+                ORIG    0000h
+                JMP Inicio
+
+; --------------------------------------
+
+; Inicializa R1 (Código) e R2 (Endereço de Destino)
+Inicio:         CALL InitEntradas
+                CALL ValidarCodigo
+                CALL CalcularEnderecoString
+                CALL EscreverString
+                JMP FIM
+
+; --------------------------------------
+; Inicializa valores padrão
+InitEntradas:   MOV R1, 09h      ; Código de teste (Inválido)
+                MOV R2, 8100h    ; Endereço de memória para escrita
+                RET
+
+; --------------------------------------
+; Valida se o código é maior ou igual a 0Ch
+ValidarCodigo:  CMP R1, 0Ch      ; Compara R1 com 0Ch
+                BR.P CodigoInvalido  ; Se maior, vai para inválido
+                BR.Z CodigoInvalido  ; Se igual, vai para inválido
+                RET
+
+CodigoInvalido: MOV R4, 80F0h    ; Aponta para STRING_INVALIDO
+                CALL EscreverString
+                JMP FIM
+
+; --------------------------------------
+; Calcula o Endereço (de memóra) Base da String
+CalcularEnderecoString: MOV R4, 00h      ; Limpar R4 (endereço temporário)
+                        MOV R3, R1       ; Copia R1 para R3 (contador)
+                        MOV R0, R0       ; Reset Bit de Estado
+                        CMP R1, 00h      ; Se R1 for 0, pula multiplicação
+                        BR.Z FimCalculoEndString
+
+LoopMultiplica:         ADD R4, 14h      ; Soma 0x14 (20 em decimal)
+                        DEC R3           ; Decrementa o contador
+                        BR.NZ LoopMultiplica
+
+FimCalculoEndString:    ADD R4, 8000h ; Soma ao endereço base
+                        RET
+
+; --------------------------------------
+; Escreve a String no Endereço de Destino
+EscreverString: MOV R3, M[R4]    ; Carrega caractere atual da string
+                MOV R0, R0       ; Reset Bit de Estado
+                CMP R3, 00h      ; Verifica se é terminador nulo
+                BR.Z FimEscrita  ; Se for nulo, encerra
+                MOV M[R2], R3    ; Armazena caractere em R2
+                INC R2           ; Incrementa ponteiro de destino
+                INC R4           ; Incrementa ponteiro de origem
+                BR EscreverString
+
+FimEscrita:     RET
+
+; --------------------------------------
+; Encerramento
+FIM:            NOP
+                JMP Inicio

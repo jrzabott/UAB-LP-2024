@@ -1,0 +1,103 @@
+; Comparação de códigos TF e TTF com validação correta
+; R1: Primeiro código
+; R2: Segundo código
+; R3: Resultado final
+; FLAGS:
+;   FLAG_R1_INVALIDO = 1 → R1 Inválido
+;   FLAG_R2_INVALIDO = 1 → R2 Inválido
+
+                ORIG    8000h
+VAL_MAX         WORD    0Ch     ; Maior valor válido (0Bh → 1011 em binário)
+FLAG_R1         WORD    00h     ; Flag para R1 inválido
+FLAG_R2         WORD    00h     ; Flag para R2 inválido
+RESULT_0        WORD    00h     ; R1 != R2 // R1 inválido, R2 válido
+RESULT_1        WORD    01h     ; R1 != R2 // R2 inválido, R1 válido
+RESULT_2        WORD    02h     ; R1 != R2 // Ambos inválidos
+RESULT_3        WORD    03h     ; R1 != R2 // Diferentes e válidos
+RESULT_4        WORD    04h     ; R1 == R2 // Iguais e inválidos
+RESULT_5        WORD    05h     ; R1 == R2 // Iguais e válidos
+
+                ORIG    0000h
+                JMP Inicio
+
+Inicio:         CALL InitFlags
+                CALL CarregarValores
+                CALL ValidarR1
+                CALL ValidarR2
+                CALL Decidir
+                JMP FIM
+x
+; -----------------------
+; Inicialização das Flags
+InitFlags:      MOV R0, R0       ; Reset do Bit de Estado
+                MOV R4, 00h      ; FLAG válida
+                MOV R5, 01h      ; FLAG inválida
+                MOV M[8001h], R4 ; FLAG_R1 = 0
+                MOV M[8002h], R4 ; FLAG_R2 = 0
+                RET
+
+; -----------------------
+; Carregamento de Valores
+CarregarValores:MOV R1, 0Bh      ; Valor padrão R1
+                MOV R2, 0Bh      ; Valor padrão R2
+                RET
+
+; -----------------------
+; Validação de R1
+ValidarR1:      MOV R0, R0       ; Reset do Bit de Estado
+                CMP R1, M[VAL_MAX] ; R1 >= 0Ch?
+                BR.P ValR1Invalido ; Se positivo, é inválido
+                BR.Z ValR1Invalido ; Se zero, também é inválido
+                MOV M[8001h], R4   ; FLAG_R1 = 0 (Válido)
+                RET
+ValR1Invalido:  MOV R0, R0       ; Reset do Bit de Estado
+                MOV M[8001h], R5 ; FLAG_R1 = 1 (Inválido)
+                RET
+
+; -----------------------
+; Validação de R2
+ValidarR2:      MOV R0, R0       ; Reset do Bit de Estado
+                CMP R2, M[VAL_MAX] ; R2 >= 0Ch?
+                BR.P ValR2Invalido ; Se positivo, é inválido
+                BR.Z ValR2Invalido ; Se zero, também é inválido
+                MOV M[8002h], R4   ; FLAG_R2 = 0 (Válido)
+                RET
+ValR2Invalido:  MOV R0, R0       ; Reset do Bit de Estado
+                MOV M[8002h], R5 ; FLAG_R2 = 1 (Inválido)
+                RET
+
+; -----------------------
+; Decisão Final
+Decidir:        MOV R0, R0       ; Reset do Bit de Estado
+                CMP M[8001h], R5 ; FLAG_R1 == 1?
+                BR.Z DecR1Invalido
+                MOV R0, R0       ; Reset do Bit de Estado
+                CMP M[8002h], R5 ; FLAG_R2 == 1?
+                BR.Z DecR2Invalido
+                MOV R0, R0       ; Reset do Bit de Estado
+                CMP R1, R2       ; R1 == R2?
+                BR.Z IguaisValidos
+                MOV R3, M[8006h] ; Diferentes e válidos
+                RET
+
+DecR1Invalido:  CMP M[8002h], R5 ; FLAG_R2 == 1?
+                BR.Z AmbosInvalidos
+                MOV R3, M[8003h] ; R1 inválido, R2 válido
+                RET
+
+DecR2Invalido:  MOV R3, M[8004h] ; R2 inválido, R1 válido
+                RET
+
+AmbosInvalidos: CMP R1, R2       ; R1 == R2?
+                BR.Z IguaisInvalidos
+                MOV R3, M[8005h] ; Ambos inválidos
+                RET
+
+IguaisValidos:  MOV R3, M[8008h] ; Iguais e válidos
+                RET
+
+IguaisInvalidos:MOV R3, M[8007h] ; Iguais e inválidos
+                RET
+
+FIM:            NOP
+                JMP Inicio

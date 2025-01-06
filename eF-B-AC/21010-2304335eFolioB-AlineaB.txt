@@ -1,0 +1,66 @@
+; Conversão de código (R1) para string ASCII armazenada em memória (R2)
+; R1: Código de entrada (00h a 03h)
+; R2: Endereço de memória para armazenar a string
+; FLAGS: Nenhuma necessária
+
+                ORIG    8000h
+STRING_BOCA     STR     'B', 'o', 'c', 'a', 0h
+STRING_NARIZ    STR     'N', 'a', 'r', 'i', 'z', 0h
+STRING_OLHOS    STR     'O', 'l', 'h', 'o', 's', 0h
+STRING_INVALIDO STR     'I', 'n', 'v', 'a', 'l', 'i', 'd', 'o', 0h
+
+                ORIG    0000h
+                JMP Inicio
+
+Inicio:         CALL InitEntradas
+                CALL SelecionarString
+                CALL EscreverString
+                JMP FIM
+
+; -----------------------
+; Ler valor das Entradas, e preparar endereço de saída
+InitEntradas:   MOV R1, 05h
+                MOV R2, 9004h
+                RET
+; -----------------------
+; Seleção da String (R1 determina o ponteiro de origem para R3)
+SelecionarString:CMP R1, 00h
+                BR.Z StringBoca
+                CMP R1, 01h
+                BR.Z StringNariz
+                CMP R1, 02h
+                BR.Z StringOlhos
+                CMP R1, 03h
+                BR.Z StringInvalido
+                BR.P StringInvalido
+                BR.N StringInvalido
+
+                JMP FIM ; Caso código inválido (não deveria ocorrer)
+
+StringBoca:     MOV R3, STRING_BOCA
+                RET
+StringNariz:    MOV R3, STRING_NARIZ
+                RET
+StringOlhos:    MOV R3, STRING_OLHOS
+                RET
+StringInvalido: MOV R3, STRING_INVALIDO
+                RET
+
+; -----------------------
+; Escrita da String (Copia caractere por caractere de R3 para R2)
+EscreverString: MOV R4, M[R3]    ; Carrega caractere atual de R3
+                CMP R4, 00h      ; Verificar se é fim da String
+                BR.Z FimEscrita  ; Termina se caractere for nulo (00h)
+                MOV M[R2], R4    ; Armazena caractere em R2
+                INC R2           ; Incrementa ponteiro de destino
+                INC R3           ; Incrementa ponteiro de origem
+                BR EscreverString
+
+FimEscrita:     MOV R0, R0       ; Reset do Bit de Estado
+                RET
+
+; -----------------------
+; Encerramento
+FIM:            NOP
+                MOV R0, R0       ; Reset do Bit de Estado
+                JMP Inicio

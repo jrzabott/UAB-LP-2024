@@ -1,0 +1,137 @@
+; Comparação de Vetores TF/TTF com FLAGS
+; R4: Ponteiro Vetor 1
+; R5: Ponteiro Vetor 2
+; R6: Ponteiro Vetor Resultado
+; R1: Valor atual do Vetor 1
+; R2: Valor atual do Vetor 2
+; R3: Resultado da comparação
+
+; -----------------------
+; Inicialização dos Valores contidos nos Ponteiros
+                ORIG 8000h
+        R1_0    WORD    AAh
+        R1_1    WORD    02h
+        R1_2    WORD    FFh
+        R1_3    WORD    02h
+        R1_4    WORD    AAh
+        R1_5    WORD    05h
+
+                ORIG 8100h
+        R2_0    WORD    03h
+        R2_1    WORD    AAh
+        R2_2    WORD    AAh
+        R2_3    WORD    03h
+        R2_4    WORD    AAh
+        R2_5    WORD    05h
+
+                ORIG 8300h    ; Colocar as flags na memória após o vetor de
+                              ;     resultados esperados.
+FLAG_R1         WORD    00h   ; 0 = Válido, 1 = Inválido
+FLAG_R2         WORD    00h   ; 0 = Válido, 1 = Inválido
+
+; -----------------------
+; Código Principal
+                ORIG    0000h
+                JMP     Inicio
+
+; -----------------------
+; Inicialização dos Ponteiros
+Inicio:         CALL    InitPonteiros
+LoopPrincipal:  MOV     R1, M[R4]    ; Carrega valor do Vetor 1
+                MOV     R2, M[R5]    ; Carrega valor do Vetor 2
+
+                ; Validação
+                CALL    ValidarR1
+                CALL    ValidarR2
+
+                ; Decisão de Resultado
+                CALL    Decidir
+
+                ; Armazena Resultado
+                MOV     M[R6], R3
+
+                ; Avança Ponteiros
+                INC     R4
+                INC     R5
+                INC     R6
+
+                ; Verifica fim do vetor
+                CMP     R4, 800Ch    ; Ajuste limite do vetor
+                BR.NZ   LoopPrincipal
+                JMP     FIM
+
+; -----------------------
+; Inicialização dos Endereços dos Ponteiros
+InitPonteiros:  MOV     R4, 8000h    ; Ponteiro para Vetor 1
+                MOV     R5, 8100h    ; Ponteiro para Vetor 2
+                MOV     R6, 8200h    ; Ponteiro para Vetor Resultado
+                RET
+
+; -----------------------
+; Validação de R1 com Flag
+ValidarR1:      MOV R0, R0           ; Reset do Bit de Estado
+                CMP     R1, 0Ch      ; Compara R1 com 0Ch (Maior valor válido)
+                BR.P    ValR1Invalido
+                BR.Z    ValR1Invalido
+                MOV     R3, 00h        ; R3 como valor temporário
+                MOV     M[FLAG_R1], R3 ; FLAG_R1 = 0 (Válido)
+                RET
+
+ValR1Invalido:  MOV     R3, 01h        ; R3 como valor temporário
+                MOV     M[FLAG_R1], R3 ; FLAG_R1 = 1 (Inválido)
+                RET
+
+; -----------------------
+; Validação de R2 com Flag
+ValidarR2:      MOV R0, R0             ; Reset do Bit de Estado
+                CMP     R2, 0Ch        ; Compara R2 com 0Ch (Maior valor válido)
+                BR.P    ValR2Invalido
+                BR.Z    ValR2Invalido
+                MOV     R3, 00h        ; R3 como valor temporário
+                MOV     M[FLAG_R2], R3 ; FLAG_R2 = 0 (Válido)
+                RET
+
+ValR2Invalido:  MOV     R3, 01h        ;
+                MOV     M[FLAG_R2], R3 ; FLAG_R2 = 1 (Inválido)
+                RET
+
+; -----------------------
+; Decisão de Resultado com FLAGS
+Decidir:        MOV     R0, R0           ; Reset do Bit de Estado
+                MOV     R3, M[FLAG_R1];
+                CMP     R3, 01h ; R1 inválido?
+                BR.Z    DecR1Invalido
+
+                MOV     R3, M[FLAG_R2];
+                CMP     R3, 01h ; R2 inválido?
+                BR.Z    DecR2Invalido
+
+                CMP     R1, R2       ; R1 == R2?
+                BR.Z    IguaisValidos
+                MOV     R3, 03h      ; Diferentes e válidos
+                RET
+
+DecR1Invalido:  MOV     R3, M[FLAG_R2]
+                CMP     R3, 01h ; R2 também inválido?
+                BR.Z    AmbosInvalidos
+                MOV     R3, 00h      ; R1 inválido, R2 válido
+                RET
+
+DecR2Invalido:  MOV     R3, 01h      ; R2 inválido, R1 válido
+                RET
+
+AmbosInvalidos: CMP     R1, R2       ; São iguais?
+                BR.Z    IguaisInvalidos
+                MOV     R3, 02h      ; Ambos inválidos, mas diferentes
+                RET
+
+IguaisInvalidos:MOV     R3, 04h      ; Iguais e inválidos
+                RET
+
+IguaisValidos:  MOV     R3, 05h      ; Iguais e válidos
+                RET
+
+; -----------------------
+; Encerramento
+FIM:            NOP
+                JMP     Inicio

@@ -1,0 +1,117 @@
+; ======================================
+; Strings em ASCII - Organizadas com Blocos Fixos de 20 Endereços
+
+; --- DECLARAÇÃO DAS STRINGS ---
+                ORIG    9000h
+STRING_BOCA_GRANDE     STR     'B', 'o', 'c', 'a', ' ', 'g', 'r', 'a', 'n', 'd', 'e', 0h
+
+                ORIG    9014h
+STRING_BOCA_PEQUENA    STR     'B', 'o', 'c', 'a', ' ', 'p', 'e', 'q', 'u', 'e', 'n', 'a', 0h
+
+                ORIG    9028h
+STRING_BOCA_ABERTA     STR     'B', 'o', 'c', 'a', ' ', 'a', 'b', 'e', 'r', 't', 'a', 0h
+
+                ORIG    903Ch
+STRING_BOCA_FECHADA    STR     'B', 'o', 'c', 'a', ' ', 'f', 'e', 'c', 'h', 'a', 'd', 'a', 0h
+
+                ORIG    9050h
+STRING_NARIZ_CURTO     STR     'N', 'a', 'r', 'i', 'z', ' ', 'c', 'u', 'r', 't', 'o', 0h
+
+                ORIG    9064h
+STRING_NARIZ_COMPRIDO  STR     'N', 'a', 'r', 'i', 'z', ' ', 'c', 'o', 'm', 'p', 'r', 'i', 'd', 'o', 0h
+
+                ORIG    9078h
+STRING_NARIZ_ESTREITO  STR     'N', 'a', 'r', 'i', 'z', ' ', 'e', 's', 't', 'r', 'e', 'i', 't', 'o', 0h
+
+                ORIG    908Ch
+STRING_NARIZ_LARGO     STR     'N', 'a', 'r', 'i', 'z', ' ', 'l', 'a', 'r', 'g', 'o', 0h
+
+                ORIG    90A0h
+STRING_OLHOS_CASTANHOS STR     'O', 'l', 'h', 'o', 's', ' ', 'c', 'a', 's', 't', 'a', 'n', 'h', 'o', 's', 0h
+
+                ORIG    90B4h
+STRING_OLHOS_VERDES    STR     'O', 'l', 'h', 'o', 's', ' ', 'v', 'e', 'r', 'd', 'e', 's', 0h
+
+                ORIG    90C8h
+STRING_OLHOS_AZUIS     STR     'O', 'l', 'h', 'o', 's', ' ', 'a', 'z', 'u', 'i', 's', 0h
+
+                ORIG    90DCh
+STRING_OLHOS_CINZENTOS STR     'O', 'l', 'h', 'o', 's', ' ', 'c', 'i', 'n', 'z', 'e', 'n', 't', 'o', 's', 0h
+
+                ORIG    90F0h
+STRING_INVALIDO        STR     'I', 'n', 'v', 'a', 'l', 'i', 'd', 'o', 0h
+
+
+; ======================================
+; --- INICIALIZAÇÃO MANUAL DO VETOR DE ENTRADA
+                ORIG    8000h
+POS_0           WORD    0Fh
+POS_1           WORD    06h
+POS_2           WORD    03h
+POS_3           WORD    00h
+POS_4           WORD    01h
+POS_5           WORD    0Bh
+
+; ======================================
+; --- INÍCIO DO PROGRAMA ---
+                ORIG    0000h
+                JMP Inicio
+
+; --------------------------------------
+
+Inicio:         MOV R5, 8000h    ; Ponteiro para o vetor de entrada (início em 8000h)
+                MOV R2, 8010h    ; Ponteiro para a área de saída (início em 8010h)
+                MOV R6, 10h      ; Contador para 16 posições do vetor (8000h..800Fh)
+
+LoopLeitura:    MOV R1, M[R5]    ; Lê um valor do vetor
+                CALL ValidarCodigo
+                CMP R4, 90F0h    ; se o codigo for invalido pular escrita string
+                BR.Z CallEscreverStr
+                CALL CalcularEnderecoString
+CallEscreverStr:CALL EscreverString
+                INC R5           ; Avança para a próxima posição do vetor
+                DEC R6           ; Decrementa o contador
+                BR.NZ LoopLeitura
+                JMP FIM
+
+; --------------------------------------
+; Valida se o código é maior ou igual a 0Ch
+ValidarCodigo:  MOV R4, 00h      ; Limpar R4 (endereço temporário)
+                CMP R1, 0Ch      ; Compara R1 com 0Ch
+                BR.P CodigoInvalido  ; Se maior, vai para inválido
+                BR.Z CodigoInvalido  ; Se igual, vai para inválido
+                RET
+
+CodigoInvalido: MOV R4, 90F0h    ; Aponta para STRING_INVALIDO
+                RET
+
+; --------------------------------------
+; Calcula o Endereço Base da String
+CalcularEnderecoString: MOV R3, R1       ; Copia R1 para R3 (contador)
+                        CMP R1, 00h      ; Se R1 for 0, pula multiplicação
+                        BR.Z FimCalculoEndString
+
+LoopMultiplica:         ADD R4, 14h      ; Soma 14h (20 em decimal)
+                        DEC R3           ; Decrementa o contador
+                        BR.NZ LoopMultiplica
+
+FimCalculoEndString:    ADD R4, 9000h ; Soma ao endereço base das strings
+                        RET
+
+; --------------------------------------
+; Escreve a String no Endereço de Destino
+EscreverString: MOV R3, M[R4]    ; Carrega caractere atual da string
+                CMP R3, 00h      ; Verifica se é terminador nulo
+                BR.Z FimEscrita  ; Se for nulo, encerra
+                MOV M[R2], R3    ; Armazena caractere em R2
+                INC R2           ; Incrementa ponteiro de destino
+                INC R4           ; Incrementa ponteiro de origem
+                BR EscreverString
+
+FimEscrita:     INC R2           ; Avança ponteiro de destino (para próxima string)
+                RET
+
+; --------------------------------------
+; Encerramento
+FIM:            NOP
+                JMP FIM
