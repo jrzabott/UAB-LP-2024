@@ -15,6 +15,6 @@ typedef struct {
     char *local;
 } RegistoSensor;
 
-char* RegistoSensorToString(RegistoSensor registo);
+char* registoSensorToString(RegistoSensor registo);
 
 #endif //REGISTOSENSOR_H

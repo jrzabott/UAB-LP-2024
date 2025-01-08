@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-char* RegistoSensorToString(RegistoSensor registo) {
+char* registoSensorToString(RegistoSensor registo) {
     char *format= "Matricula: %s\nTipo: %s\nVelocidade: %d\nVia: %s\nLocal: %s\n";
     int len = snprintf(NULL, 0, format,
         registo.matricula,
