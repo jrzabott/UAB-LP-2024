@@ -4,9 +4,6 @@
 #include <stdio.h>   // printf, scanf
 #include <stdlib.h>  // malloc, free
 
-// Opção: Usar enumeradores para tipos de abelhas.
-// Observação: alguns nomes foram encurtados para evitar conflitos
-// e facilitar a leitura, mas mantemos termos em português.
 typedef enum {
     FAXINEIRA,
     NUTRIZ,
@@ -20,12 +17,10 @@ typedef enum {
     PUPA
 } TipoAbelha;
 
-// Estrutura para representar uma abelha.
-// Adicionaremos campos (ex.: nome, idade, última refeição, etc.) nos próximos passos.
 typedef struct {
     TipoAbelha tipo;
-    // Por enquanto, não definimos idade, ultimaRefeicao, etc.
-    // Faremos isso num passo posterior.
+    // Vamos em breve adicionar mais campos:
+    //   idadeEmMinutos, ultimaRefeicao, etc.
 } Abelha;
 
 /************************************************************
@@ -33,21 +28,50 @@ typedef struct {
  ************************************************************/
 void lerDadosEntrada(int *pNumAbelhas, int *pNumCelulas,
                      int *pMinutosPorTemp, int *pTemporadas);
+Abelha* alocarColmeia(int n);
 
 /************************************************************
  *  Implementação das Funções
  ************************************************************/
 
-// Ler os 4 inteiros de entrada, guardando nos endereços passados.
 void lerDadosEntrada(int *pNumAbelhas, int *pNumCelulas,
                      int *pMinutosPorTemp, int *pTemporadas)
 {
-    // Por quê? Precisamos destas leituras para configurar o programa
-    // e, nesta alínea A, utilizaremos principalmente "pNumAbelhas".
     scanf("%d", pNumAbelhas);
     scanf("%d", pNumCelulas);
     scanf("%d", pMinutosPorTemp);
     scanf("%d", pTemporadas);
+}
+
+/*
+ * Esta função aloca um array (vetor) de Abelha,
+ * com dimensão n.
+ * Devolve o ponteiro para a memória alocada.
+ */
+Abelha* alocarColmeia(int n)
+{
+    // Por quê? Precisamos de armazenar n abelhas
+    // na heap, pois o número n depende da entrada.
+    Abelha *vetor = (Abelha*) malloc(n * sizeof(Abelha));
+
+    // Verificação simples: se malloc falhar, retorna NULL
+    // Em contexto de VPL, dificilmente falha, mas é boa prática.
+    if (vetor == NULL)
+    {
+        printf("Erro: nao foi possivel alocar memoria para abelhas.\n");
+        return NULL;
+    }
+
+    // Inicializar cada abelha com um valor padrão,
+    // evitando lixo de memória.
+    for (int i = 0; i < n; i++)
+    {
+        vetor[i].tipo = FAXINEIRA;
+        // Por enquanto, colocamos tudo como FAXINEIRA.
+        // No Passo 3, faremos a distribuição real.
+    }
+
+    return vetor;
 }
 
 /************************************************************
@@ -55,20 +79,31 @@ void lerDadosEntrada(int *pNumAbelhas, int *pNumCelulas,
  ************************************************************/
 int main()
 {
-    // Variáveis para a entrada
     int numAbelhas = 0;
     int numCelulas = 0;
     int minutosPorTemporada = 0;
     int numTemporadas = 0;
 
-    // Ler dados de entrada
+    // Ler os parâmetros de entrada
     lerDadosEntrada(&numAbelhas, &numCelulas,
                     &minutosPorTemporada, &numTemporadas);
 
-    // Por enquanto, apenas exibimos para verificar se está ok
-    printf("Lido: abelhas=%d, celulas=%d, minutosTemp=%d, temporadas=%d\n",
-           numAbelhas, numCelulas, minutosPorTemporada, numTemporadas);
+    // Alocar dinamicamente o vetor de abelhas
+    Abelha *colmeia = alocarColmeia(numAbelhas);
 
-    // Encerramos, sem alocar memória ou criar abelhas ainda.
+    if (colmeia == NULL)
+    {
+        // Se a alocacao falhar, vamos abortar o programa.
+        return 1;
+    }
+
+    // Por enquanto, só fazemos algo simples, como exibir
+    // a quantidade total de abelhas alocadas e o tipo padrão
+    printf("Alocadas %d abelhas. Todas inicialmente definidas como FAXINEIRA.\n",
+           numAbelhas);
+
+    // Liberar a memória antes de sair
+    free(colmeia);
+
     return 0;
 }
