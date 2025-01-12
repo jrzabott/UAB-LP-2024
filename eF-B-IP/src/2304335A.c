@@ -5,7 +5,6 @@
 
 /*
  * Função auxiliar: calcula a distribuição das operárias (fax, nut, con, gua, for)
- * seguindo a lógica "diária" dos testes oficiais.
  */
 void calcularDistribuicaoOperarias(int N, int *resFax, int *resNut, int *resCon, int *resGua, int *resFor)
 {
@@ -30,7 +29,7 @@ void calcularDistribuicaoOperarias(int N, int *resFax, int *resNut, int *resCon,
         // Em cada dia, criamos 'daily' abelhas
         for (int i = 0; i < daily; i++)
         {
-            // Descobrir qual o tipo via "round robin" 5 funções
+            // criar abelhas (udpate) aos contadores de acordo com o tipo de abelha
             // i.e. fax -> nut -> con -> gua -> for -> fax -> ...
             int tipo = (i % 5);
             switch(tipo) {
@@ -46,7 +45,7 @@ void calcularDistribuicaoOperarias(int N, int *resFax, int *resNut, int *resCon,
 
 /*
  * Função para imprimir o relatório final da colmeia
- * conforme os testes solicitam.
+ * no formato dos testes solicitam.
  */
 void imprimirRelatorio(int fax, int nut, int con, int gua, int forr, int zan, int rai)
 {
@@ -54,12 +53,11 @@ void imprimirRelatorio(int fax, int nut, int con, int gua, int forr, int zan, in
     printf("Relatorio colmeia:\n");
 
     // Linha com os nomes das funções e outras tags (ovo, lar, pup, etc.)
-    // Observando o enunciado que mostra esse cabeçalho fixo
     printf(" fax nut con gua for zan rai ovo lar pup mel pol nec cri zan rea\n");
 
     // Se a colmeia está vazia, ou seja, fax + nut + con + gua + forr + zan + rai == 0?
     // Pelos testes, quando N<200, é para não imprimir nada na segunda linha (ficar em branco).
-    // Mas note que "zan=40, rai=1" só é válido se N>=200. Então, se N<200 => zan=0, rai=0 => tudo zero.
+    // N<200 => zan=0, rai=0 => tudo zero.
     int total = fax + nut + con + gua + forr + zan + rai;
     if (total > 0) {
         // Imprime a linha com os valores
