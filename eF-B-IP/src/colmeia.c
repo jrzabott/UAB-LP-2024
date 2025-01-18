@@ -81,9 +81,12 @@ void inicializarAbelhas(Colmeia *colmeia, int totalAbelhas) {
     }
 
     // Adicionar operárias
-    int daily = (totalAbelhas - colmeia->totalAbelhas) / DIAS_VIDA_OPERARIA;
+    int operariasRestantes = totalAbelhas - colmeia->totalAbelhas;
+    int daily = operariasRestantes / DIAS_VIDA_OPERARIA;
+    int extra = operariasRestantes % DIAS_VIDA_OPERARIA;
+
     for (int dia = 0; dia < DIAS_VIDA_OPERARIA; dia++) {
-        for (int i = 0; i < daily && colmeia->totalAbelhas < totalAbelhas; i++) {
+        for (int i = 0; i < daily + (dia < extra ? 1 : 0) && colmeia->totalAbelhas < totalAbelhas; i++) {
             TipoAbelha tipo = (TipoAbelha)(i % 5); // Ciclo: FAXINEIRA -> NUTRIZ -> ...
             colmeia->abelhas[colmeia->totalAbelhas++] = (Abelha){tipo, dia + 1, (dia + 1) * MINUTOS_POR_DIA / DIAS_VIDA_OPERARIA};
         }
@@ -140,7 +143,7 @@ void inicializarFavos(Colmeia *colmeia, int totalCelulas) {
             debugLog(debugMessage);
         }
 
-        // Adicionar célula ZAN se houver espaço
+        // Adicionar célula ZAN
         if (celulasNesteFavo > 0) {
             favo->celulas[celulasNesteFavo - 1].tipo = ZAN;
             favo->celulas[celulasNesteFavo - 1].quantidade = 0;
