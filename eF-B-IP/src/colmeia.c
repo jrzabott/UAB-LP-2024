@@ -71,24 +71,36 @@ void inicializarAbelhas(Colmeia *colmeia, int totalAbelhas) {
     colmeia->totalAbelhas = 0;
 
     // Adicionar 40 zangões
-    for (int i = 0; i < 40 && colmeia->totalAbelhas < totalAbelhas; i++) {
+    for (int i = 0; i < 40; i++) {
         colmeia->abelhas[colmeia->totalAbelhas++] = (Abelha){ZANGAO, i + 1, (i + 1) * MINUTOS_POR_DIA / DIAS_VIDA_OPERARIA};
     }
 
     // Adicionar 1 rainha
-    if (colmeia->totalAbelhas < totalAbelhas) {
-        colmeia->abelhas[colmeia->totalAbelhas++] = (Abelha){RAINHA, 0, 0};
+    colmeia->abelhas[colmeia->totalAbelhas++] = (Abelha){RAINHA, 0, 0};
+
+    // Calcular operárias restantes
+    int totalOperarias = totalAbelhas - 41; // Subtrai 40 zangões e 1 rainha
+    if (totalOperarias <= 0) {
+        debugLog("Nenhuma operária para inicializar.");
+        return;
     }
 
-    // Adicionar operárias
-    int operariasRestantes = totalAbelhas - colmeia->totalAbelhas;
-    int daily = operariasRestantes / DIAS_VIDA_OPERARIA;
-    int extra = operariasRestantes % DIAS_VIDA_OPERARIA;
+    // Distribuir operárias pelas funções
+    int base = totalOperarias / 5;
+    int extra = totalOperarias % 5;
 
-    for (int dia = 0; dia < DIAS_VIDA_OPERARIA; dia++) {
-        for (int i = 0; i < daily + (dia < extra ? 1 : 0) && colmeia->totalAbelhas < totalAbelhas; i++) {
-            TipoAbelha tipo = (TipoAbelha)(i % 5); // Ciclo: FAXINEIRA -> NUTRIZ -> ...
-            colmeia->abelhas[colmeia->totalAbelhas++] = (Abelha){tipo, dia + 1, (dia + 1) * MINUTOS_POR_DIA / DIAS_VIDA_OPERARIA};
+    int distrib[5] = {base, base, base, base, base};
+    for (int i = 0; i < extra; i++) {
+        distrib[i]++;
+    }
+
+    for (int dia = 0; dia < DIAS_VIDA_OPERARIA && totalOperarias > 0; dia++) {
+        for (int tipo = 0; tipo < 5; tipo++) {
+            if (distrib[tipo] > 0) {
+                colmeia->abelhas[colmeia->totalAbelhas++] = (Abelha){tipo, dia + 1, (dia + 1) * MINUTOS_POR_DIA / DIAS_VIDA_OPERARIA};
+                distrib[tipo]--;
+                totalOperarias--;
+            }
         }
     }
 
@@ -99,19 +111,22 @@ void inicializarAbelhas(Colmeia *colmeia, int totalAbelhas) {
 void inicializarFavos(Colmeia *colmeia, int totalCelulas) {
     debugLog("Inicializando favos e células...");
 
+    // Calcular o número total de favos
     colmeia->totalFavos = (totalCelulas + 2999) / 3000; // ceil(totalCelulas / 3000)
     char debugMessage[200];
     sprintf(debugMessage, "Total de favos calculados: %d", colmeia->totalFavos);
     debugLog(debugMessage);
 
+    // Alocar memória para os favos
     colmeia->favos = (Favo *)malloc(colmeia->totalFavos * sizeof(Favo));
     if (!colmeia->favos) {
         fprintf(stderr, "[ERROR] Falha ao alocar memória para favos.\n");
         exit(EXIT_FAILURE);
     }
 
+    // Calcular a distribuição de células entre os favos
     int celulasPorFavo = totalCelulas / colmeia->totalFavos; // floor(totalCelulas / totalFavos)
-    int restoCelulas = totalCelulas % colmeia->totalFavos; // Restante para distribuir
+    int restoCelulas = totalCelulas % colmeia->totalFavos; // Restantes a serem distribuídas
 
     sprintf(debugMessage, "Células por favo: %d, Resto de células: %d", celulasPorFavo, restoCelulas);
     debugLog(debugMessage);
@@ -128,6 +143,7 @@ void inicializarFavos(Colmeia *colmeia, int totalCelulas) {
         sprintf(debugMessage, "Favo %d - Células neste favo: %d", f, celulasNesteFavo);
         debugLog(debugMessage);
 
+        // Alocar memória para as células do favo
         Favo *favo = &colmeia->favos[f];
         favo->totalCelulas = celulasNesteFavo;
         favo->celulas = (Celula *)malloc(celulasNesteFavo * sizeof(Celula));
@@ -136,23 +152,34 @@ void inicializarFavos(Colmeia *colmeia, int totalCelulas) {
             exit(EXIT_FAILURE);
         }
 
+        // Inicializar as células no favo
+        int mel = 0, pol = 0, nec = 0, cri = 0;
+
         for (int c = 0; c < celulasNesteFavo; c++) {
             TipoCelula tipo = (TipoCelula)(c % 4); // Ciclo: MEL -> POLEN -> NECTAR -> CRIA
             favo->celulas[c] = (Celula){tipo, tipo == MEL ? 500 : tipo == POLEN ? 20 : tipo == NECTAR ? 40 : 0};
+
+            // Atualizar contagem com base no tipo
+            switch (tipo) {
+                case MEL: mel++; break;
+                case POLEN: pol++; break;
+                case NECTAR: nec++; break;
+                case CRIA: cri++; break;
+                default: break;
+            }
+
             sprintf(debugMessage, "Favo %d - Célula %d inicializada como tipo %d", f, c, tipo);
             debugLog(debugMessage);
         }
 
-        // Adicionar célula ZAN
-        if (celulasNesteFavo > 0) {
-            favo->celulas[celulasNesteFavo - 1].tipo = ZAN;
-            favo->celulas[celulasNesteFavo - 1].quantidade = 0;
-            debugLog("Célula ZAN adicionada no final do favo.");
-        }
+        // Relatório parcial de distribuição no favo
+        sprintf(debugMessage, "Favo %d - Distribuição: MEL=%d, POLEN=%d, NECTAR=%d, CRIA=%d", f, mel, pol, nec, cri);
+        debugLog(debugMessage);
     }
 
     debugLog("Favos e células inicializados.");
 }
+
 
 /* Função para liberar memória alocada */
 void liberarColmeia(Colmeia *colmeia) {
@@ -212,24 +239,33 @@ void imprimirRelatorioInicial(Colmeia *colmeia) {
                 case POLEN: pol++; break;
                 case NECTAR: nec++; break;
                 case CRIA: cri++; break;
-                case ZAN: zan++; break;
+                case ZAN: zan++; break; // Contar apenas como célula vazia
                 default: break;
             }
         }
 
-        printf("    Favo   %d:            celulas vazias:             %d   %d\n", f, cri, zan);
-        printf("                                 usadas:  %d  %d  %d\n", mel, pol, nec);
+        // Relatório: ZAN apenas em células vazias
+        printf("    Favo   %d:            celulas vazias:             %d   %d\n",
+               f, cri, zan);
+        printf("                                 usadas:  %d  %d  %d\n",
+               mel, pol, nec);
+
     }
 }
 
 int main() {
-    int N, nCelulas, minTemp, temporadas;
-    scanf("%d %d %d %d", &N, &nCelulas, &minTemp, &temporadas);
+    int operarias, nCelulas, minTemp, temporadas;
+    scanf("%d %d %d %d", &operarias, &nCelulas, &minTemp, &temporadas);
+
+    // Adicionar os 41 (40 zangões + 1 rainha)
+    int totalAbelhas = operarias + 41;
 
     Colmeia colmeia;
-    inicializarColmeia(&colmeia, N, nCelulas);
+
+    inicializarColmeia(&colmeia, totalAbelhas, nCelulas);
     imprimirRelatorioInicial(&colmeia);
     liberarColmeia(&colmeia);
 
     return 0;
 }
+
