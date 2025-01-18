@@ -19,7 +19,11 @@ add_executable(
 add_executable(
         tester      # Nome do executável
         src/tester.c
-        src/2304335A.c
+)
+
+add_executable(
+        colmeia2      # Nome do executável
+        src/colmeia2.c
 )
 
 # Specify where the executable should be built.

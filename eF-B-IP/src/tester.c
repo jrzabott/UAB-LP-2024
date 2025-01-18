@@ -8,14 +8,7 @@
 #define EXPECTED_DIR "/Users/jrzab/CLionProjects/UAB-LP-2024/eF-B-IP/src/test_fixtures/output_expected/"
 #define ACTUAL_DIR "/Users/jrzab/CLionProjects/UAB-LP-2024/eF-B-IP/src/test_fixtures/output_actual/"
 #define MAX_LINE_LENGTH 1024
-
-// Example function from the target application
-// TODO: Replace this with the actual implementation
-const char* process_numbers(int a, int b, int c, int d) {
-    static char result[256];
-    snprintf(result, sizeof(result), "Processed numbers: %d, %d, %d, %d", a, b, c, d);
-    return result;
-}
+#define COLMEIA_EXECUTABLE "colmeia.exe"
 
 void ensure_directory_exists(const char *directory) {
     DIR *dir = opendir(directory);
@@ -100,31 +93,14 @@ void process_test_files() {
             snprintf(expected_file, sizeof(expected_file), "%s/%s_expected.txt", EXPECTED_DIR, test_name);
             snprintf(actual_file, sizeof(actual_file), "%s/%s_actual.txt", ACTUAL_DIR, test_name);
 
-            // Read input file
-            FILE *input = fopen(input_file, "r");
-            if (!input) {
-                fprintf(stderr, "[ERROR] Unable to open input file: %s\n", input_file);
+            // Execute colmeia2.exe and redirect output to actual file
+            char command[1024];
+            snprintf(command, sizeof(command), "%s < %s > %s", COLMEIA_EXECUTABLE, input_file, actual_file);
+            int ret = system(command);
+            if (ret != 0) {
+                fprintf(stderr, "[ERROR] Failed to execute command: %s\n", command);
                 continue;
             }
-
-            int a, b, c, d;
-            if (fscanf(input, "%d %d %d %d", &a, &b, &c, &d) != 4) {
-                fprintf(stderr, "[ERROR] Invalid input format in file: %s\n", input_file);
-                fclose(input);
-                continue;
-            }
-            fclose(input);
-
-            // Process input and generate output
-            const char *output = process_numbers(a, b, c, d);
-
-            FILE *actual = fopen(actual_file, "w");
-            if (!actual) {
-                fprintf(stderr, "[ERROR] Unable to create actual output file: %s\n", actual_file);
-                continue;
-            }
-            fprintf(actual, "%s\n", output);
-            fclose(actual);
 
             // Compare actual vs expected
             compare_files(expected_file, actual_file, test_name);

@@ -1,1 +1,23 @@
-Processed numbers: 400, 3781, 1440, -2
+Relatorio colmeia:
+ fax nut con gua for zan rai ovo lar pup mel pol nec cri zan rea
+  80  80  80  80  80  40   1
+    Favo   0:            celulas vazias:             472   1
+                                 usadas:  473  473  472
+    Favo   1:            celulas vazias:             472   1
+                                 usadas:  473  473  472
+Relatorio colmeia: 1 dia(s)
+Relatorio colmeia:
+ fax nut con gua for zan rai ovo lar pup mel pol nec cri zan rea
+  77  77  77  77  77  38   1
+    Favo   0:            celulas vazias:             472   1
+                                 usadas:  473  473  472
+    Favo   1:            celulas vazias:             472   1
+                                 usadas:  473  473  472
+Relatorio colmeia: 2 dia(s)
+Relatorio colmeia:
+ fax nut con gua for zan rai ovo lar pup mel pol nec cri zan rea
+  75  75  75  75  75  37   1
+    Favo   0:            celulas vazias:             472   1
+                                 usadas:  473  473  472
+    Favo   1:            celulas vazias:             472   1
+                                 usadas:  473  473  472
