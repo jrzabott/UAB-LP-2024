@@ -523,8 +523,7 @@ void simular(ColmeiaAbelhas* col, ColmeiaFavos* cf,
     }
 }
 
-int main()
-{
+int run(void) {
     int N,W,minTemp,temps;
     scanf("%d%d%d%d",&N,&W,&minTemp,&temps);
 
@@ -556,4 +555,8 @@ int main()
         free(cFav);
     }
     return 0;
+}
+
+int main() {
+    return run();
 }
