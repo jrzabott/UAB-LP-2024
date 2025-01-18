@@ -145,8 +145,8 @@ void inicializarFavos(Colmeia *colmeia, int totalCelulas) {
 
         // Alocar memória para as células do favo
         Favo *favo = &colmeia->favos[f];
-        favo->totalCelulas = celulasNesteFavo;
-        favo->celulas = (Celula *)malloc(celulasNesteFavo * sizeof(Celula));
+        favo->totalCelulas = celulasNesteFavo + 1; // Adicionar célula ZAN
+        favo->celulas = (Celula *)malloc(favo->totalCelulas * sizeof(Celula));
         if (!favo->celulas) {
             fprintf(stderr, "[ERROR] Falha ao alocar memória para células do favo %d.\n", f);
             exit(EXIT_FAILURE);
@@ -172,6 +172,11 @@ void inicializarFavos(Colmeia *colmeia, int totalCelulas) {
             debugLog(debugMessage);
         }
 
+        // Adicionar célula ZAN
+        favo->celulas[celulasNesteFavo] = (Celula){ZAN, 0};
+        sprintf(debugMessage, "Favo %d - Célula ZAN adicionada.", f);
+        debugLog(debugMessage);
+
         // Relatório parcial de distribuição no favo
         sprintf(debugMessage, "Favo %d - Distribuição: MEL=%d, POLEN=%d, NECTAR=%d, CRIA=%d", f, mel, pol, nec, cri);
         debugLog(debugMessage);
@@ -179,6 +184,7 @@ void inicializarFavos(Colmeia *colmeia, int totalCelulas) {
 
     debugLog("Favos e células inicializados.");
 }
+
 
 
 /* Função para liberar memória alocada */
@@ -245,11 +251,8 @@ void imprimirRelatorioInicial(Colmeia *colmeia) {
         }
 
         // Relatório: ZAN apenas em células vazias
-        printf("    Favo   %d:            celulas vazias:             %d   %d\n",
-               f, cri, zan);
-        printf("                                 usadas:  %d  %d  %d\n",
-               mel, pol, nec);
-
+        printf("    Favo   %d:            celulas vazias:              %d   %d\n", f, cri, zan);
+        printf("                                 usadas:  %d  %d  %d\n", mel, pol, nec);
     }
 }
 
