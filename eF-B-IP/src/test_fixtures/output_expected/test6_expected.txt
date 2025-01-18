@@ -1,0 +1,30 @@
+Relatorio colmeia:
+ fax nut con gua for zan rai ovo lar pup mel pol nec cri zan rea
+ 200 200 200 200 200  40   1
+    Favo   0:            celulas vazias:             750   1
+                                 usadas: 750 750 750
+Relatorio colmeia: 1 dia(s)
+ fax nut con gua for zan rai ovo lar pup mel pol nec cri zan rea
+ 194 195 195 195 195  38   1
+    Favo   0:            celulas vazias:  20 207     750   1
+                                 usadas: 730 543 750
+Relatorio colmeia: 2 dia(s)
+ fax nut con gua for zan rai ovo lar pup mel pol nec cri zan rea
+ 189 190 190 190 190  37   1
+    Favo   0:            celulas vazias:  40 405     750   1
+                                 usadas: 710 345 750
+Relatorio colmeia: 3 dia(s)
+ fax nut con gua for zan rai ovo lar pup mel pol nec cri zan rea
+ 184 185 185 185 185  36   1
+    Favo   0:            celulas vazias:  59 598     750   1
+                                 usadas: 691 152 750
+Relatorio colmeia: 4 dia(s)
+ fax nut con gua for zan rai ovo lar pup mel pol nec cri zan rea
+ 145 146 146 146 147  28
+    Favo   0:            celulas vazias:  75 750     750   1
+                                 usadas: 675     750
+Relatorio colmeia: 4 dia(s) 19 hora(s) 48 minuto(s)
+ fax nut con gua for zan rai ovo lar pup mel pol nec cri zan rea
+
+    Favo   0:            celulas vazias:  75 750     750   1
+                                 usadas: 675     750

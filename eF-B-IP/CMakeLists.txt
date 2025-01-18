@@ -13,6 +13,12 @@ include_directories(
 # Ficheiros de código fonte.
 add_executable(
         colmeia      # Nome do executável
+        src/2304335C.c
+)
+
+add_executable(
+        tester      # Nome do executável
+        src/tester.c
         src/2304335A.c
 )
 
