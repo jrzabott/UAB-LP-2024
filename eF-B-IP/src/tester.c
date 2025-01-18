@@ -1,106 +1,122 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
+#include <dirent.h>
+#include <errno.h>
 
+#define INPUT_DIR "/Users/jrzab/CLionProjects/UAB-LP-2024/eF-B-IP/src/test_fixtures/input"
+#define EXPECTED_DIR "/Users/jrzab/CLionProjects/UAB-LP-2024/eF-B-IP/src/test_fixtures/output_expected/"
+#define ACTUAL_DIR "/Users/jrzab/CLionProjects/UAB-LP-2024/eF-B-IP/src/test_fixtures/output_actual/"
 #define MAX_LINE_LENGTH 1024
 
-// Function to compare the outputs line by line
-bool compare_outputs(const char *expected_file, const char *actual_file) {
+void ensure_directory_exists(const char *directory) {
+    DIR *dir = opendir(directory);
+    if (!dir) {
+        if (errno == ENOENT) {
+            fprintf(stderr, "[ERROR] Directory '%s' does not exist.\n", directory);
+            exit(EXIT_FAILURE);
+        } else {
+            perror("[ERROR] Failed to open directory");
+            exit(EXIT_FAILURE);
+        }
+    }
+    closedir(dir);
+}
+
+void compare_files(const char *expected_file, const char *actual_file, const char *test_name) {
     FILE *expected = fopen(expected_file, "r");
     FILE *actual = fopen(actual_file, "r");
 
     if (!expected || !actual) {
-        perror("Error opening files");
-        return false;
+        fprintf(stderr, "[ERROR] Unable to open files for comparison: %s or %s\n", expected_file, actual_file);
+        exit(EXIT_FAILURE);
     }
 
-    char expected_line[MAX_LINE_LENGTH];
-    char actual_line[MAX_LINE_LENGTH];
-    int line_number = 0;
+    char expected_line[MAX_LINE_LENGTH], actual_line[MAX_LINE_LkENGTH];
+    int line_number = 1;
+    int differences_found = 0;
 
     while (fgets(expected_line, MAX_LINE_LENGTH, expected) && fgets(actual_line, MAX_LINE_LENGTH, actual)) {
-        line_number++;
         if (strcmp(expected_line, actual_line) != 0) {
-            printf("Mismatch at line %d:\n", line_number);
+            printf("[DIFF] Test: %s | Line: %d\n", test_name, line_number);
             printf("Expected: %s", expected_line);
-            printf("Actual:   %s", actual_line);
-            fclose(expected);
-            fclose(actual);
-            return false;
+            printf("Actual  : %s", actual_line);
+            differences_found = 1;
         }
+        line_number++;
     }
 
-    // Check if both files have reached EOF
-    bool both_eof = feof(expected) && feof(actual);
-    if (!both_eof) {
-        printf("Files have different lengths.\n");
+    // Check for extra lines in either file
+    while (fgets(expected_line, MAX_LINE_LENGTH, expected)) {
+        printf("[DIFF] Test: %s | Line: %d\n", test_name, line_number);
+        printf("Expected: %s", expected_line);
+        printf("Actual  : (no line)\n");
+        differences_found = 1;
+        line_number++;
+    }
+
+    while (fgets(actual_line, MAX_LINE_LENGTH, actual)) {
+        printf("[DIFF] Test: %s | Line: %d\n", test_name, line_number);
+        printf("Expected: (no line)\n");
+        printf("Actual  : %s", actual_line);
+        differences_found = 1;
+        line_number++;
+    }
+
+    if (!differences_found) {
+        printf("[INFO] Test: %s | No differences found.\n", test_name);
     }
 
     fclose(expected);
     fclose(actual);
-    return both_eof;
 }
 
-// Function to run the program and capture its output
-void run_test(const char *input_file, const char *output_file, const char *program) {
-    char command[MAX_LINE_LENGTH];
-    snprintf(command, sizeof(command), "%s < %s > %s", program, input_file, output_file);
-    system(command);
-}
+void process_test_files() {
+    struct dirent *entry;
+    DIR *input_dir = opendir(INPUT_DIR);
 
-int main() {
-    const char *program = "./bin/colmeia.exe"; // Path to your compiled executable
-    const char *input_dir = "../../src/test_fixtures/input/";
-    const char *expected_dir = "../../src/test_fixtures/output_expected/";
-    const char *actual_dir = "../../src/test_fixtures/output_actual/";
+    if (!input_dir) {
+        perror("[ERROR] Failed to open input directory");
+        exit(EXIT_FAILURE);
+    }
 
-    const char *test_cases[] = {
-        "test1_input.txt",
-        "test2_input.txt",
-        "test3_input.txt",
-        "test4_input.txt",
-        "test5_input.txt",
-        "test6_input.txt",
-        "test7_input.txt",
-        "test8_input.txt",
-        "test9_input.txt",
-        "test10_input.txt",
-    };
+    while ((entry = readdir(input_dir)) != NULL) {
+        if (strstr(entry->d_name, "_input.txt")) {
+            char test_name[256];
+            strncpy(test_name, entry->d_name, strstr(entry->d_name, "_input.txt") - entry->d_name);
+            test_name[strstr(entry->d_name, "_input.txt") - entry->d_name] = '\0';
 
-    const char *expected_outputs[] = {
-        "test1_expected.txt",
-        "test2_expected.txt",
-        "test3_expected.txt",
-        "test4_expected.txt",
-        "test5_expected.txt",
-        "test6_expected.txt",
-        "test7_expected.txt",
-        "test8_expected.txt",
-        "test9_expected.txt",
-        "test10_expected.txt",
-    };
+            // Build file paths
+            char input_file[512], expected_file[512], actual_file[512];
+            snprintf(input_file, sizeof(input_file), "%s%s", INPUT_DIR, entry->d_name);
+            snprintf(expected_file, sizeof(expected_file), "%s%s_expected.txt", EXPECTED_DIR, test_name);
+            snprintf(actual_file, sizeof(actual_file), "%s%s_actual.txt", ACTUAL_DIR, test_name);
 
-    const size_t test_count = sizeof(test_cases) / sizeof(test_cases[0]);
+            // Placeholder: Process the input and generate the actual output
+            // TODO: Replace with actual application function call
+            FILE *actual = fopen(actual_file, "w");
+            fprintf(actual, "Placeholder output for %s\n", test_name);
+            fclose(actual);
 
-    for (size_t i = 0; i < test_count; i++) {
-        char input_file[MAX_LINE_LENGTH];
-        char expected_file[MAX_LINE_LENGTH];
-        char actual_output[MAX_LINE_LENGTH];
-
-        snprintf(input_file, sizeof(input_file), "%s%s", input_dir, test_cases[i]);
-        snprintf(expected_file, sizeof(expected_file), "%s%s", expected_dir, expected_outputs[i]);
-        snprintf(actual_output, sizeof(actual_output), "%soutput_test%d.txt", actual_dir, (int)(i + 1));
-
-        printf("Running Test %zu...\n", i + 1);
-        run_test(input_file, actual_output, program);
-
-        if (compare_outputs(expected_file, actual_output)) {
-            printf("Test %zu passed.\n", i + 1);
-        } else {
-            printf("Test %zu failed.\n", i + 1);
+            // Compare actual vs expected
+            compare_files(expected_file, actual_file, test_name);
         }
     }
 
+    closedir(input_dir);
+}
+
+int main() {
+    printf("[INFO] Starting automated test runner...\n");
+
+    // Ensure directories exist
+    ensure_directory_exists(INPUT_DIR);
+    ensure_directory_exists(EXPECTED_DIR);
+    ensure_directory_exists(ACTUAL_DIR);
+
+    // Process test files
+    process_test_files();
+
+    printf("[INFO] Test runner completed.\n");
     return 0;
 }
