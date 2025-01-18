@@ -1,1 +1,1 @@
-Placeholder output for test4
+Processed numbers: 280, 400, 1440, -40

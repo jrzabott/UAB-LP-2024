@@ -1,1 +1,1 @@
-Placeholder output for test6
+Processed numbers: 1000, 3000, 1440, -40

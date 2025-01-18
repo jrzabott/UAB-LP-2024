@@ -9,6 +9,14 @@
 #define ACTUAL_DIR "/Users/jrzab/CLionProjects/UAB-LP-2024/eF-B-IP/src/test_fixtures/output_actual/"
 #define MAX_LINE_LENGTH 1024
 
+// Example function from the target application
+// TODO: Replace this with the actual implementation
+const char* process_numbers(int a, int b, int c, int d) {
+    static char result[256];
+    snprintf(result, sizeof(result), "Processed numbers: %d, %d, %d, %d", a, b, c, d);
+    return result;
+}
+
 void ensure_directory_exists(const char *directory) {
     DIR *dir = opendir(directory);
     if (!dir) {
@@ -32,7 +40,7 @@ void compare_files(const char *expected_file, const char *actual_file, const cha
         exit(EXIT_FAILURE);
     }
 
-    char expected_line[MAX_LINE_LENGTH], actual_line[MAX_LINE_LkENGTH];
+    char expected_line[MAX_LINE_LENGTH], actual_line[MAX_LINE_LENGTH];
     int line_number = 1;
     int differences_found = 0;
 
@@ -88,14 +96,34 @@ void process_test_files() {
 
             // Build file paths
             char input_file[512], expected_file[512], actual_file[512];
-            snprintf(input_file, sizeof(input_file), "%s%s", INPUT_DIR, entry->d_name);
-            snprintf(expected_file, sizeof(expected_file), "%s%s_expected.txt", EXPECTED_DIR, test_name);
-            snprintf(actual_file, sizeof(actual_file), "%s%s_actual.txt", ACTUAL_DIR, test_name);
+            snprintf(input_file, sizeof(input_file), "%s/%s", INPUT_DIR, entry->d_name);
+            snprintf(expected_file, sizeof(expected_file), "%s/%s_expected.txt", EXPECTED_DIR, test_name);
+            snprintf(actual_file, sizeof(actual_file), "%s/%s_actual.txt", ACTUAL_DIR, test_name);
 
-            // Placeholder: Process the input and generate the actual output
-            // TODO: Replace with actual application function call
+            // Read input file
+            FILE *input = fopen(input_file, "r");
+            if (!input) {
+                fprintf(stderr, "[ERROR] Unable to open input file: %s\n", input_file);
+                continue;
+            }
+
+            int a, b, c, d;
+            if (fscanf(input, "%d %d %d %d", &a, &b, &c, &d) != 4) {
+                fprintf(stderr, "[ERROR] Invalid input format in file: %s\n", input_file);
+                fclose(input);
+                continue;
+            }
+            fclose(input);
+
+            // Process input and generate output
+            const char *output = process_numbers(a, b, c, d);
+
             FILE *actual = fopen(actual_file, "w");
-            fprintf(actual, "Placeholder output for %s\n", test_name);
+            if (!actual) {
+                fprintf(stderr, "[ERROR] Unable to create actual output file: %s\n", actual_file);
+                continue;
+            }
+            fprintf(actual, "%s\n", output);
             fclose(actual);
 
             // Compare actual vs expected

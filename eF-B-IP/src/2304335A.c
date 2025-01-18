@@ -75,8 +75,7 @@ void imprimirRelatorio(int fax, int nut, int con, int gua, int forr, int zan, in
     printf("                                 usadas:\n");
 }
 
-int main()
-{
+int run(void) {
     int N, nCelulas, minTemp, temporadas;
     scanf("%d %d %d %d", &N, &nCelulas, &minTemp, &temporadas);
 
@@ -94,3 +93,7 @@ int main()
 
     return 0;
 }
+
+// int main() {
+//     return run();
+// }

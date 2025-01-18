@@ -1,1 +1,1 @@
-Placeholder output for test9
+Processed numbers: 750, 6500, 10080, -40

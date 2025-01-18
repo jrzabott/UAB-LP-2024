@@ -1,1 +1,1 @@
-Placeholder output for test5
+Processed numbers: 290, 4000, 8640, -40

@@ -1,1 +1,1 @@
-Placeholder output for test8
+Processed numbers: 400, 3781, 1440, -2

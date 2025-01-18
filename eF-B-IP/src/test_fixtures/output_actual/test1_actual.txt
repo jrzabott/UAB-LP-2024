@@ -1,1 +1,1 @@
-Placeholder output for test1
+Processed numbers: 200, 50, 1, -4
