@@ -93,7 +93,7 @@ void process_test_files() {
             snprintf(expected_file, sizeof(expected_file), "%s/%s_expected.txt", EXPECTED_DIR, test_name);
             snprintf(actual_file, sizeof(actual_file), "%s/%s_actual.txt", ACTUAL_DIR, test_name);
 
-            // Execute colmeia2.exe and redirect output to actual file
+            // Execute colmeia.exe and redirect output to actual file
             char command[1024];
             snprintf(command, sizeof(command), "%s < %s > %s", COLMEIA_EXECUTABLE, input_file, actual_file);
             int ret = system(command);

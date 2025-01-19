@@ -94,6 +94,6 @@ int run(void) {
     return 0;
 }
 
-// int main() {
-//     return run();
-// }
+ int main() {
+     return run();
+ }
